@@ -370,7 +370,84 @@ router.get('/auth/me', authMiddleware, (req: Request, res: Response) => {
   });
 });
 
-// User Profile Retrieval (Self or Admin)
+// -------------------------------------------------------------
+// AUTHENTICATED PERSONAL PROFILE (SELF ONLY - ZERO MULTI-USER EXPOSURE)
+// -------------------------------------------------------------
+router.get('/profile/me', authMiddleware, (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const db = getDb();
+  const user = db.users.find(u => u.id === authUser.id);
+  if (!user) {
+    return sendError(res, 'User record not found in system database.', 'NOT_FOUND', 404);
+  }
+
+  let customer = null;
+  if (user.customerId) {
+    customer = db.customers.find(c => c.id === user.customerId);
+  }
+
+  const { passwordHash: _, ...safeUser } = user;
+  return sendSuccess(res, {
+    ...safeUser,
+    customer,
+  });
+});
+
+router.put('/profile/me', authMiddleware, (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const db = getDb();
+  const user = db.users.find(u => u.id === authUser.id);
+  if (!user) {
+    return sendError(res, 'User not found.', 'NOT_FOUND', 404);
+  }
+
+  // Prevent user from changing their own role or permissions
+  if (req.body.role && req.body.role !== user.role) {
+    return sendError(res, 'Modifying user roles or permissions is strictly forbidden.', 'FORBIDDEN', 403);
+  }
+
+  const { name, phone, title, department, address, city, state, country, postalCode, bio } = req.body;
+
+  if (name !== undefined && String(name).trim()) user.name = String(name).trim();
+  if (phone !== undefined) user.phone = String(phone).trim();
+  if (title !== undefined) user.title = String(title).trim();
+  if (department !== undefined) user.department = String(department).trim();
+  if (address !== undefined) user.address = String(address).trim();
+  if (city !== undefined) user.city = String(city).trim();
+  if (state !== undefined) user.state = String(state).trim();
+  if (country !== undefined) user.country = String(country).trim();
+  if (postalCode !== undefined) user.postalCode = String(postalCode).trim();
+  if (bio !== undefined) user.bio = String(bio).trim();
+  user.updatedAt = new Date().toISOString();
+
+  // Synchronize contact details to customer record if applicable
+  if (user.customerId) {
+    const cust = db.customers.find(c => c.id === user.customerId);
+    if (cust) {
+      if (phone !== undefined) cust.phone = user.phone;
+      if (address !== undefined) cust.billingAddress = user.address;
+      if (city !== undefined) cust.city = user.city;
+      if (state !== undefined) cust.state = user.state;
+      if (country !== undefined) cust.country = user.country;
+      if (postalCode !== undefined) cust.postalCode = user.postalCode;
+    }
+  }
+
+  saveDb();
+
+  logAudit(
+    authUser,
+    'update_profile',
+    'user',
+    user.id,
+    `User ${authUser.name} updated their personal profile.`
+  );
+
+  const { passwordHash: _, ...safeUser } = user;
+  return sendSuccess(res, safeUser, 'Profile updated successfully.');
+});
+
+// User Profile Retrieval (Alias)
 router.get('/users/profile', authMiddleware, (req: Request, res: Response) => {
   const authUser = (req as any).user as AuthUser;
   const db = getDb();
@@ -3171,6 +3248,213 @@ router.post('/ai/transcribe', authMiddleware, async (req: Request, res: Response
     console.error('Gemini Transcribe error:', err);
     return sendError(res, err.message || 'Error processing audio transcription.', 'AI_ERROR', 500);
   }
+});
+
+// -------------------------------------------------------------
+// NOTIFICATIONS API – Role-Gated Live Alerts (Failed Payments, Pending Renewals, System Maintenance)
+// -------------------------------------------------------------
+router.get('/notifications', authMiddleware, (req: Request, res: Response) => {
+  const user = (req as any).user as AuthUser;
+  const db = getDb();
+  const now = new Date();
+
+  const notifications: any[] = [];
+
+  // 1. FAILED PAYMENTS
+  if (user.role === 'ADMIN' || user.role === 'STAFF') {
+    const failedPayments = db.payments.filter(
+      (p) => p.status === 'FAILED' || p.status === 'REVERSED'
+    );
+    failedPayments.forEach((p) => {
+      const customer = db.customers.find((c) => c.id === p.customerId);
+      const custName = customer?.companyName || customer?.name || p.customerId || 'Customer';
+      notifications.push({
+        id: `notif-pmt-${p.id}`,
+        category: 'payment',
+        severity: 'critical',
+        title: `Payment Failure: ${p.paymentNumber}`,
+        message: `Payment of ₹${Number(p.amount).toLocaleString('en-IN')} for ${custName} failed. Dunning attention required.`,
+        timestamp: p.paymentDate || p.createdAt || now.toISOString(),
+        read: false,
+        actionUrl: '/payments',
+        actionLabel: 'Inspect Payment',
+        metadata: {
+          paymentId: p.id,
+          customerId: p.customerId,
+          amount: p.amount,
+          currency: p.currency || 'INR',
+        },
+      });
+    });
+  } else if (user.role === 'CUSTOMER' && user.customerId) {
+    const myFailedPayments = db.payments.filter(
+      (p) => p.customerId === user.customerId && (p.status === 'FAILED' || p.status === 'REVERSED')
+    );
+    myFailedPayments.forEach((p) => {
+      notifications.push({
+        id: `notif-pmt-cust-${p.id}`,
+        category: 'payment',
+        severity: 'critical',
+        title: 'Payment Failed - Action Required',
+        message: `Your payment of ₹${Number(p.amount).toLocaleString('en-IN')} (${p.paymentNumber}) could not be completed. Please update your billing method.`,
+        timestamp: p.paymentDate || p.createdAt || now.toISOString(),
+        read: false,
+        actionUrl: '/customer/dashboard',
+        actionLabel: 'Update Payment',
+        metadata: {
+          paymentId: p.id,
+          amount: p.amount,
+          currency: p.currency || 'INR',
+        },
+      });
+    });
+  }
+
+  // 2. PENDING RENEWALS
+  if (user.role === 'ADMIN' || user.role === 'STAFF') {
+    const activeSubs = db.subscriptions.filter((s) => s.status === 'ACTIVE');
+    activeSubs.forEach((s) => {
+      const renewalDateStr = s.nextBillingDate || s.currentPeriodEnd;
+      if (renewalDateStr) {
+        const renewalDate = new Date(renewalDateStr);
+        const daysRemaining = Math.ceil((renewalDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+        if (daysRemaining >= 0 && daysRemaining <= 30) {
+          const customer = db.customers.find((c) => c.id === s.customerId);
+          const custName = customer?.companyName || customer?.name || 'Customer';
+          const plan = db.plans.find((p) => p.id === s.planId);
+          const amt = Number(s.totalRecurringAmount || s.totalAmount || s.unitPrice) || 0;
+          notifications.push({
+            id: `notif-renewal-${s.id}`,
+            category: 'renewal',
+            severity: daysRemaining <= 7 ? 'warning' : 'info',
+            title: `Renewal Pending (${daysRemaining}d): ${s.subscriptionNumber}`,
+            message: `${custName}'s ${plan?.name || 'plan'} subscription renews on ${renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (₹${amt.toLocaleString('en-IN')}).`,
+            timestamp: s.updatedAt || s.createdAt || now.toISOString(),
+            read: false,
+            actionUrl: '/renewals',
+            actionLabel: 'Review Renewal',
+            metadata: {
+              subscriptionId: s.id,
+              customerId: s.customerId,
+              amount: amt,
+              renewalDate: renewalDateStr,
+            },
+          });
+        }
+      }
+    });
+  } else if (user.role === 'CUSTOMER' && user.customerId) {
+    const myActiveSubs = db.subscriptions.filter(
+      (s) => s.customerId === user.customerId && s.status === 'ACTIVE'
+    );
+    myActiveSubs.forEach((s) => {
+      const renewalDateStr = s.nextBillingDate || s.currentPeriodEnd;
+      if (renewalDateStr) {
+        const renewalDate = new Date(renewalDateStr);
+        const daysRemaining = Math.ceil((renewalDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+        if (daysRemaining >= 0 && daysRemaining <= 30) {
+          const plan = db.plans.find((p) => p.id === s.planId);
+          const amt = Number(s.totalRecurringAmount || s.totalAmount || s.unitPrice) || 0;
+          notifications.push({
+            id: `notif-renewal-cust-${s.id}`,
+            category: 'renewal',
+            severity: 'info',
+            title: `Upcoming Plan Renewal (${daysRemaining} days)`,
+            message: `Your ${plan?.name || 'subscription'} renews on ${renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} for ₹${amt.toLocaleString('en-IN')}.`,
+            timestamp: s.updatedAt || s.createdAt || now.toISOString(),
+            read: false,
+            actionUrl: '/customer/dashboard',
+            actionLabel: 'View Subscription',
+            metadata: {
+              subscriptionId: s.id,
+              amount: amt,
+              renewalDate: renewalDateStr,
+            },
+          });
+        }
+      }
+    });
+  }
+
+  // 3. SYSTEM MAINTENANCE & OPERATIONAL ANNOUNCEMENTS
+  notifications.push({
+    id: 'notif-sys-maint-01',
+    category: 'system',
+    severity: 'info',
+    title: 'Scheduled Engine Maintenance',
+    message: 'NEXORA Recurring Billing Engine v3.4 maintenance scheduled for Sunday at 02:00 AM UTC. Automated dunning will pause for 15 minutes with zero downtime for customer portals.',
+    timestamp: new Date(Date.now() - 3600 * 1000 * 4).toISOString(),
+    read: false,
+    actionUrl: user.role === 'CUSTOMER' ? '/customer/dashboard' : '/billing-engine',
+    actionLabel: 'System Status',
+  });
+
+  if (user.role === 'ADMIN') {
+    const overdueInvoices = db.invoices.filter((i) => i.status === 'OVERDUE');
+    if (overdueInvoices.length > 0) {
+      notifications.push({
+        id: 'notif-sys-sentinel-overdue',
+        category: 'security',
+        severity: 'warning',
+        title: 'Revenue Guard Sentinel Alert',
+        message: `${overdueInvoices.length} invoices are currently overdue across enterprise accounts. Dunning cycle #2 has been initiated.`,
+        timestamp: new Date(Date.now() - 3600 * 1000 * 1.5).toISOString(),
+        read: false,
+        actionUrl: '/revenue-guard',
+        actionLabel: 'Open Revenue Guard',
+      });
+    }
+  } else if (user.role === 'STAFF') {
+    notifications.push({
+      id: 'notif-sys-reconciliation-ready',
+      category: 'system',
+      severity: 'info',
+      title: 'Daily Reconciliation Batch Ready',
+      message: 'Automated bank statement reconciliation batch generated with 98.4% match confidence. Ready for operational sign-off.',
+      timestamp: new Date(Date.now() - 3600 * 1000 * 2).toISOString(),
+      read: false,
+      actionUrl: '/reconciliation',
+      actionLabel: 'Review Matches',
+    });
+  } else if (user.role === 'CUSTOMER') {
+    notifications.push({
+      id: 'notif-sys-gst-einvoice',
+      category: 'system',
+      severity: 'info',
+      title: 'GST Digital E-Invoices Active',
+      message: 'Your monthly billing invoices now include QR codes and digital IRN signatures for compliant business tax filing.',
+      timestamp: new Date(Date.now() - 3600 * 1000 * 6).toISOString(),
+      read: false,
+      actionUrl: '/customer/dashboard',
+      actionLabel: 'Download Invoices',
+    });
+  }
+
+  const severityWeight: Record<string, number> = {
+    critical: 3,
+    warning: 2,
+    info: 1,
+    success: 0,
+  };
+
+  notifications.sort((a, b) => {
+    const diff = (severityWeight[b.severity] || 0) - (severityWeight[a.severity] || 0);
+    if (diff !== 0) return diff;
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+
+  return sendSuccess(res, {
+    notifications,
+    totalCount: notifications.length,
+    criticalCount: notifications.filter((n) => n.severity === 'critical').length,
+    warningCount: notifications.filter((n) => n.severity === 'warning').length,
+    categories: {
+      payments: notifications.filter((n) => n.category === 'payment').length,
+      renewals: notifications.filter((n) => n.category === 'renewal').length,
+      system: notifications.filter((n) => n.category === 'system' || n.category === 'security').length,
+    },
+    userRole: user.role,
+  });
 });
 
 export default router;

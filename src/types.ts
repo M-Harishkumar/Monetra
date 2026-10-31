@@ -289,3 +289,29 @@ export interface EmailLog {
   status: string;
   emailBody: string;
 }
+
+export type NotificationCategory = 'payment' | 'renewal' | 'system' | 'security' | 'general';
+export type NotificationSeverity = 'critical' | 'warning' | 'info' | 'success';
+
+export interface AppNotification {
+  id: string;
+  category: NotificationCategory;
+  severity: NotificationSeverity;
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  targetRole?: UserRole[] | 'ALL';
+  actionUrl?: string;
+  actionLabel?: string;
+  metadata?: {
+    subscriptionId?: string;
+    paymentId?: string;
+    invoiceId?: string;
+    customerId?: string;
+    amount?: number;
+    currency?: string;
+    renewalDate?: string;
+  };
+}
+

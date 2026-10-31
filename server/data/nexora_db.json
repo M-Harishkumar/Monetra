@@ -245,6 +245,20 @@
   "passwordResetTokens": [],
   "auditLogs": [
     {
+      "id": "AUDIT-1793434776831-928",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-ADMIN-01",
+      "actorName": "Elena Rostova",
+      "actorRole": "ADMIN",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-ADMIN-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User admin@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T08:19:36.831Z"
+    },
+    {
       "id": "AUDIT-1793434366566-259",
       "eventType": "USER_LOGIN",
       "actorId": "USR-CUST-01",
@@ -1356,6 +1370,20 @@
       "notes": "Customer deposit awaiting open invoice generation.",
       "status": "COMPLETED",
       "createdAt": "2026-10-29T04:56:52.665Z"
+    },
+    {
+      "id": "PAY-005",
+      "paymentNumber": "PAY-2025-005",
+      "customerId": "CUST-002",
+      "invoiceId": "INV-002",
+      "paymentDate": "2026-10-30T10:15:00.000Z",
+      "paymentMethod": "CARD",
+      "amount": 19647.00,
+      "allocatedAmount": 0,
+      "transactionReference": "TXN-STRIPE-FAILED-892",
+      "notes": "Transaction declined by issuing bank: Card expired.",
+      "status": "FAILED",
+      "createdAt": "2026-10-30T10:15:00.000Z"
     }
   ],
   "paymentAllocations": [],

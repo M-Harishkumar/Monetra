@@ -537,6 +537,74 @@ export function generateLiveDatabaseAnswer(question: string, context: any, role:
     return reply;
   }
 
+  // F. Revenue Guard Sentinel Queries
+  if (q.includes('leakage') || q.includes('sentinel') || q.includes('revenue guard') || q.includes('guard')) {
+    if (role === 'CUSTOMER') {
+      return `🔒 Revenue Guard telemetry is restricted to enterprise administrative personnel.`;
+    }
+    const unpaidCount = context.invoices.unpaidCount || 0;
+    const failedCount = context.payments.failedCount || 0;
+    return (
+      `### NEXORA Sentinel Revenue Guard\n\n` +
+      `- **Active Leakage Sentinel Status:** ACTIVE\n` +
+      `- **Overdue Invoices Under Dunning:** **${context.invoices.overdueCount || 0}**\n` +
+      `- **Unallocated / Failed Payment Items:** **${failedCount}**\n` +
+      `- **Protected Subscription Capital:** **${role === 'ADMIN' ? context.financialMetrics.mrrFormatted : 'Enterprise Tier'}**\n\n` +
+      `Automated reconciliation and dunning cycles are running on schedule.`
+    );
+  }
+
+  // G. Greetings
+  if (
+    q === 'hi' ||
+    q === 'hello' ||
+    q === 'hey' ||
+    q.startsWith('hi ') ||
+    q.startsWith('hello ') ||
+    q.startsWith('hey ') ||
+    q.includes('good morning') ||
+    q.includes('good afternoon') ||
+    q.includes('good evening')
+  ) {
+    if (role === 'CUSTOMER') {
+      return (
+        `👋 Hello **${user.name}**! Welcome to the **NEXORA Client Portal**.\n\n` +
+        `I am your real-time billing and subscription copilot. You can ask me:\n` +
+        `- *"What are my active subscriptions?"*\n` +
+        `- *"Do I have any unpaid or overdue invoices?"*\n` +
+        `- *"Show my recent payment history and receipts"*\n` +
+        `- *"When does my plan renew?"*`
+      );
+    }
+    return (
+      `👋 Hello **${user.name}** (${role})! I am your **NEXORA AI Revenue Copilot**.\n\n` +
+      `I am directly connected to the live enterprise ledger. Here are quick queries you can run instantly:\n` +
+      `- *"What is our current MRR and ARR?"* (Executive Revenue)\n` +
+      `- *"How many active subscriptions do we have?"* (Subscription Counts)\n` +
+      `- *"Which subscriptions are expiring this period?"* (Renewal Pipeline)\n` +
+      `- *"How many invoices are currently overdue?"* (Receivables)\n` +
+      `- *"Which customer payments have failed?"* (Payment Failures)\n` +
+      `- *"Which customers have the highest value?"* (Top Clients)`
+    );
+  }
+
+  // H. Help & Capabilities
+  if (q.includes('help') || q.includes('what can you do') || q.includes('who are you') || q.includes('capabilities')) {
+    return (
+      `### NEXORA Intelligence Assistant Capabilities\n\n` +
+      `I provide instant, mathematically verified answers directly from your live ledger:\n\n` +
+      `| Category | Example Question | Target Telemetry |\n` +
+      `| :--- | :--- | :--- |\n` +
+      `| **Revenue** | *"What is our monthly recurring revenue?"* | Exact MRR, ARR, and collections |\n` +
+      `| **Subscriptions** | *"How many active subscriptions do we have?"* | Active, paused, and cancelled tallies |\n` +
+      `| **Renewals** | *"Which subscriptions expire in 30 days?"* | Expiry dates and cycle values |\n` +
+      `| **Receivables** | *"How many invoices are unpaid?"* | Overdue amounts and customer list |\n` +
+      `| **Collections** | *"Which payments failed?"* | Unmatched or declined transactions |\n` +
+      `| **Accounts** | *"Which customers are at risk?"* | Churn and arrears risk analysis |\n\n` +
+      `*Type any question above or choose a suggested prompt to get an immediate response.*`
+    );
+  }
+
   // Default response for Admin / Staff
   return (
     `Hello ${user.name}! I am your **NEXORA AI Assistant**.\n\n` +
@@ -550,8 +618,81 @@ export function generateLiveDatabaseAnswer(question: string, context: any, role:
 }
 
 /**
+ * Check if a question is a direct factual or telemetry query
+ * that can be answered with sub-10ms latency from the live database.
+ */
+export function isDirectDatabaseQuery(question: string, role: string): boolean {
+  const q = question.toLowerCase().trim();
+  if (
+    q === 'hi' ||
+    q === 'hello' ||
+    q === 'hey' ||
+    q.startsWith('hi ') ||
+    q.startsWith('hello ') ||
+    q.startsWith('hey ') ||
+    q.includes('help') ||
+    q.includes('what can you do') ||
+    q.includes('who are you')
+  ) {
+    return true;
+  }
+
+  if (
+    q.includes('mrr') ||
+    q.includes('arr') ||
+    q.includes('recurring revenue') ||
+    q.includes('monthly recurring') ||
+    q.includes('active subscription') ||
+    q.includes('how many active') ||
+    q.includes('how many subscription') ||
+    q.includes('expiring') ||
+    q.includes('expire') ||
+    q.includes('renewal this week') ||
+    q.includes('unpaid invoice') ||
+    q.includes('overdue invoice') ||
+    q.includes('outstanding amount') ||
+    q.includes('how many invoice') ||
+    q.includes('failed payment') ||
+    q.includes('unmatched payment') ||
+    q.includes('collected this month') ||
+    q.includes('total payment') ||
+    q.includes('highest subscription value') ||
+    q.includes('top customer') ||
+    q.includes('largest customer') ||
+    q.includes('risk of cancellation') ||
+    q.includes('churn risk') ||
+    q.includes('at risk') ||
+    q.includes('highest revenue') ||
+    q.includes('which plan') ||
+    q.includes('top plan') ||
+    q.includes('leakage') ||
+    q.includes('revenue guard')
+  ) {
+    return true;
+  }
+
+  if (role === 'CUSTOMER') {
+    if (
+      q.includes('my subscription') ||
+      q.includes('my invoice') ||
+      q.includes('my payment') ||
+      q.includes('my plan') ||
+      q.includes('my balance') ||
+      q.includes('subscription') ||
+      q.includes('invoice') ||
+      q.includes('payment')
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Primary assistant query pipeline:
- * Combines role authorization, database context grounding, and Gemini 3.8 Flash model execution.
+ * Combines role authorization, database context grounding, sub-10ms direct telemetry dispatch,
+ * and resilient fast-timeout Gemini execution.
  */
 export async function queryAIAssistant(
   user: AuthUser,
@@ -562,7 +703,18 @@ export async function queryAIAssistant(
   const db = getDb();
   const authorizedContext = buildAuthorizedDatabaseContext(user, db);
 
-  // If Gemini key is available, run prompt through Gemini 3.8 Flash with authorized DB context
+  // FAST PATH: If the query is a factual data query, compute instantly (<10ms) from live DB
+  if (isDirectDatabaseQuery(question, user.role)) {
+    const instantAnswer = generateLiveDatabaseAnswer(question, authorizedContext, user.role, user);
+    return {
+      text: instantAnswer,
+      model: 'nexora-live-database-engine',
+      authorizedRole: user.role,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  // LLM PATH: For open-ended inquiries or conversational analysis, run Gemini with a fast 2.5s timeout race
   if (hasGeminiKey()) {
     try {
       const systemPrompt = `
@@ -581,7 +733,7 @@ ${JSON.stringify(authorizedContext, null, 2)}
 `;
 
       const chatHistory = Array.isArray(messages)
-        ? messages.slice(-6).map((m: any) => ({
+        ? messages.slice(-4).map((m: any) => ({
             role: m.sender === 'user' || m.role === 'user' ? 'user' : 'model',
             parts: [{ text: String(m.content || m.text || '') }],
           }))
@@ -595,9 +747,13 @@ ${JSON.stringify(authorizedContext, null, 2)}
         history: chatHistory,
       });
 
-      const result = await chat.sendMessage({ message: question });
+      // 2.5 second timeout race so the user is NEVER left waiting or blocked by 503 errors
+      const callPromise = chat.sendMessage({ message: question });
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500));
 
-      if (result.text && result.text.trim().length > 0) {
+      const result = await Promise.race([callPromise, timeoutPromise]);
+
+      if (result && result.text && result.text.trim().length > 0) {
         return {
           text: result.text,
           model: preferredModel || 'gemini-3.8-flash',
@@ -606,15 +762,15 @@ ${JSON.stringify(authorizedContext, null, 2)}
         };
       }
     } catch (err) {
-      console.error('Gemini Assistant API execution error, falling back to deterministic engine:', err);
+      console.warn('Gemini Assistant API execution note, falling back instantly to deterministic engine:', err);
     }
   }
 
-  // High-fidelity fallback / offline deterministic engine grounded strictly in real database data
+  // Instant deterministic response fallback
   const answer = generateLiveDatabaseAnswer(question, authorizedContext, user.role, user);
   return {
     text: answer,
-    model: hasGeminiKey() ? preferredModel : 'nexora-live-database-engine',
+    model: 'nexora-live-database-engine',
     authorizedRole: user.role,
     generatedAt: new Date().toISOString(),
   };

@@ -92,12 +92,15 @@ export const api = {
     }),
   getMe: () => request<any>('/auth/me'),
 
-  // Profile & User Directory Management
-  getProfile: () => request<any>('/users/profile'),
+  // Profile & Personal Management
+  getProfile: () => request<any>('/profile/me'),
+  getProfileMe: () => request<any>('/profile/me'),
   getUserProfile: (id: string) => request<any>(`/users/${id}/profile`),
   getAllUsers: () => request<any[]>('/users/all'),
   updateProfile: (payload: any) =>
-    request<any>('/users/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+    request<any>('/profile/me', { method: 'PUT', body: JSON.stringify(payload) }),
+  updateProfileMe: (payload: any) =>
+    request<any>('/profile/me', { method: 'PUT', body: JSON.stringify(payload) }),
   updateUserProfile: (id: string, payload: any) =>
     request<any>(`/users/${id}/profile`, { method: 'PUT', body: JSON.stringify(payload) }),
   changePassword: (payload: { currentPassword?: string; newPassword: string; confirmPassword: string }) =>
@@ -205,6 +208,18 @@ export const api = {
   getSettings: () => request<any[]>('/settings'),
   saveSettings: (settings: any[]) =>
     request('/settings', { method: 'POST', body: JSON.stringify({ settings }) }),
+
+  // Notifications
+  getNotifications: () =>
+    request<{
+      notifications: any[];
+      totalCount: number;
+      criticalCount: number;
+      warningCount: number;
+      categories: { payments: number; renewals: number; system: number };
+      userRole: string;
+    }>('/notifications'),
+
   loginWithGoogle: (payload: { uid: string; email: string; name: string; photoURL?: string }) =>
     request<{ token: string; user: any }>('/auth/google', {
       method: 'POST',

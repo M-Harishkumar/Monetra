@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Zap, CheckCircle2, User as UserIcon, Sparkles } from 'lucide-react';
+import { Menu, Zap, CheckCircle2, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { api } from '../../services/api.ts';
+import { NotificationCenter } from './NotificationCenter.tsx';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -104,6 +105,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title, subtitle
         >
           {role}
         </span>
+
+        {/* Role-Gated Notification Center */}
+        <NotificationCenter />
 
         {/* Profile Button */}
         <button
