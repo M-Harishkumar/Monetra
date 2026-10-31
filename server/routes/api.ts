@@ -4,7 +4,7 @@
  * Provides all business logic, authorization enforcement, and financial integrity checks.
  */
 
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Decimal from 'decimal.js';
@@ -13,7 +13,7 @@ import {
   calculateNextBillingDate,
   calculateInvoiceTotals,
   calculateProration,
-  BillingFrequency,
+  type BillingFrequency,
 } from '../../src/utils/billing-math.ts';
 import {
   calculateSubscriptionHealthScore,
