@@ -100,6 +100,10 @@ export const api = {
     request<any>('/users/profile', { method: 'PUT', body: JSON.stringify(payload) }),
   updateUserProfile: (id: string, payload: any) =>
     request<any>(`/users/${id}/profile`, { method: 'PUT', body: JSON.stringify(payload) }),
+  changePassword: (payload: { currentPassword?: string; newPassword: string; confirmPassword: string }) =>
+    request<any>('/users/change-password', { method: 'PUT', body: JSON.stringify(payload) }),
+  updateUserPassword: (id: string, payload: { currentPassword?: string; newPassword: string; confirmPassword: string }) =>
+    request<any>(`/users/${id}/password`, { method: 'PUT', body: JSON.stringify(payload) }),
 
   // Staff
   getStaff: () => request<any[]>('/users/staff'),

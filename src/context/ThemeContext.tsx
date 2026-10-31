@@ -12,13 +12,9 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('monetra_theme');
-    if (saved === 'dark' || saved === 'light') {
+    const saved = localStorage.getItem('nexora_theme');
+    if (saved === 'light') {
       return saved;
-    }
-    // Respect system preference if available
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
     }
     return 'light';
   });

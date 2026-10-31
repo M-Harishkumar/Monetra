@@ -29,6 +29,7 @@ import { EmailLogsPage } from './pages/email/EmailLogsPage.tsx';
 import { SettingsPage } from './pages/settings/SettingsPage.tsx';
 import { LoginPage } from './pages/auth/LoginPage.tsx';
 import { AIHubPage } from './pages/ai/AIHubPage.tsx';
+import { AIAssistantPage } from './pages/ai/AIAssistantPage.tsx';
 import { ProfilePage } from './pages/profile/ProfilePage.tsx';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -37,10 +38,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#14243A] text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#F4F9FF] text-[#243B53]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#16A6A1] border-t-transparent" />
-          <span className="text-xs font-semibold text-slate-300">Authenticating session...</span>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#368CE7] border-t-transparent" />
+          <span className="text-xs font-semibold text-[#647A91]">Authenticating session...</span>
         </div>
       </div>
     );
@@ -58,10 +59,10 @@ const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#14243A] text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#F4F9FF] text-[#243B53]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#16A6A1] border-t-transparent" />
-          <span className="text-xs font-semibold text-slate-300">Loading portal...</span>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#368CE7] border-t-transparent" />
+          <span className="text-xs font-semibold text-[#647A91]">Loading portal...</span>
         </div>
       </div>
     );
@@ -135,10 +136,18 @@ export function App() {
                 }
               />
               <Route
+                path="ai-assistant"
+                element={
+                  <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
+                    <AIAssistantPage />
+                  </RoleGuard>
+                }
+              />
+              <Route
                 path="ai-hub"
                 element={
                   <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
-                    <AIHubPage />
+                    <AIAssistantPage />
                   </RoleGuard>
                 }
               />

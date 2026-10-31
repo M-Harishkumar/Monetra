@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { api } from '../../services/api.ts';
+import { PasswordStrengthMeter } from '../../components/common/PasswordStrengthMeter.tsx';
+import { evaluatePasswordStrength } from '../../utils/password-strength.ts';
 
 export const LoginPage: React.FC = () => {
   const { login, loginWithGoogle } = useAuth();
@@ -29,6 +31,7 @@ export const LoginPage: React.FC = () => {
   // Registration state
   const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -94,6 +97,12 @@ export const LoginPage: React.FC = () => {
     setError(null);
     setSuccessMsg(null);
 
+    const strength = evaluatePasswordStrength(password);
+    if (!strength.isCompliant) {
+      setError(`Password requirement: ${strength.feedback[0] || 'Please create a stronger password meeting all security requirements.'}`);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -158,38 +167,38 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 items-center justify-center p-4 selection:bg-teal-500 selection:text-slate-950">
+    <div className="flex min-h-screen bg-[#F4F9FF] text-[#243B53] items-center justify-center p-4 selection:bg-[#368CE7] selection:text-white">
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-8 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500 text-slate-950 shadow-xl shadow-teal-500/20 mb-3">
-            <Zap className="h-6 w-6 fill-slate-950" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#368CE7] text-white shadow-xl shadow-[#368CE7]/20 mb-3">
+            <Zap className="h-6 w-6 fill-white" />
           </div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white font-heading">
+            <h1 className="text-2xl font-bold tracking-tight text-[#243B53] font-heading">
               NEXORA
             </h1>
-            <span className="rounded-sm bg-teal-500/10 px-1.5 py-0.5 text-[10px] font-bold text-teal-400 border border-teal-500/20">
+            <span className="rounded-md bg-[#DCEEFF] px-2 py-0.5 text-[10px] font-bold text-[#368CE7] border border-[#BCEBFA]">
               PRO
             </span>
           </div>
-          <p className="mt-1.5 text-xs text-slate-400 max-w-xs">
+          <p className="mt-1.5 text-xs text-[#647A91] max-w-xs">
             Enterprise Subscription &amp; Revenue Intelligence Platform
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+        <div className="rounded-2xl border border-[#D9E8F5] bg-white p-6 sm:p-8 shadow-xl">
           {/* Header text */}
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-white font-heading">
+            <h2 className="text-lg font-bold text-[#243B53] font-heading">
               {mode === 'login'
                 ? 'Sign in to platform'
                 : mode === 'register'
                 ? 'Register Client Account'
                 : 'Account Recovery'}
             </h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-[#647A91]">
               {mode === 'login'
                 ? 'Access your subscription ledger, revenue guard, and intelligence telemetry.'
                 : mode === 'register'
@@ -200,13 +209,13 @@ export const LoginPage: React.FC = () => {
 
           {/* Feedback alerts */}
           {error && (
-            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-[#D9535D]">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
           {successMsg && (
-            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-teal-500/30 bg-teal-500/10 p-3 text-xs text-teal-300">
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-[#249B70]">
               <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{successMsg}</span>
             </div>
@@ -219,7 +228,7 @@ export const LoginPage: React.FC = () => {
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-800 py-2.5 px-4 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] hover:bg-[#EAF4FF] py-2.5 px-4 text-xs font-semibold text-[#243B53] transition-colors cursor-pointer disabled:opacity-50"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
                   <path
@@ -244,10 +253,10 @@ export const LoginPage: React.FC = () => {
 
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-800" />
+                  <div className="w-full border-t border-[#D9E8F5]" />
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase font-semibold">
-                  <span className="bg-slate-900 px-2 text-slate-500">Or with work email</span>
+                  <span className="bg-white px-2 text-[#647A91]">Or with work email</span>
                 </div>
               </div>
             </div>
@@ -257,11 +266,11 @@ export const LoginPage: React.FC = () => {
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#243B53] mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#647A91]">
                     <Mail className="h-4 w-4" />
                   </div>
                   <input
@@ -270,14 +279,14 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@nexora.io"
                     required
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-9 pr-3 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 pl-9 pr-3 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#368CE7]"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-300">Password</label>
+                  <label className="block text-xs font-semibold text-[#243B53]">Password</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -285,13 +294,13 @@ export const LoginPage: React.FC = () => {
                       setError(null);
                       setSuccessMsg(null);
                     }}
-                    className="text-[11px] text-teal-400 hover:text-teal-300 cursor-pointer"
+                    className="text-[11px] text-[#368CE7] hover:text-[#2e79cc] font-medium cursor-pointer"
                   >
                     Forgot password?
                   </button>
                 </div>
                 <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#647A91]">
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -300,12 +309,12 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-9 pr-10 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 pl-9 pr-10 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#368CE7]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 cursor-pointer"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#647A91] hover:text-[#243B53] cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -318,16 +327,16 @@ export const LoginPage: React.FC = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-3.5 w-3.5 rounded border-slate-800 bg-slate-950 text-teal-500 focus:ring-teal-500 accent-teal-500"
+                    className="h-3.5 w-3.5 rounded border-[#D9E8F5] bg-white text-[#368CE7] focus:ring-[#368CE7] accent-[#368CE7]"
                   />
-                  <span className="text-[11px] text-slate-400">Remember session</span>
+                  <span className="text-[11px] text-[#647A91]">Remember session</span>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-500 py-2.5 px-4 text-xs font-bold text-slate-950 shadow-md shadow-teal-500/20 hover:bg-teal-400 transition-colors disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#368CE7] py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-[#368CE7]/20 hover:bg-[#2e79cc] transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
                   <span>{loadingMsg || 'Authenticating...'}</span>
@@ -345,68 +354,145 @@ export const LoginPage: React.FC = () => {
           {mode === 'register' && (
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#243B53] mb-1.5">
                   Full Name
                 </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Marcus Sterling"
-                  required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
-                />
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#647A91]">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Marcus Sterling"
+                    required
+                    className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 pl-9 pr-3 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#243B53] mb-1.5">
                   Email Address
                 </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
-                />
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#647A91]">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    required
+                    className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 pl-9 pr-3 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Password (min 9 chars)
+                <label className="block text-xs font-semibold text-[#243B53] mb-1.5">
+                  Create Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
-                />
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#647A91]">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter strong password"
+                    required
+                    className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 pl-9 pr-10 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#368CE7]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#647A91] hover:text-[#243B53] cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+
+                {/* Password Strength Meter */}
+                <PasswordStrengthMeter password={password} showCriteria={true} />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#243B53] mb-1.5">
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
-                />
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#647A91]">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter password"
+                    required
+                    className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 pl-9 pr-10 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#368CE7]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#647A91] hover:text-[#243B53] cursor-pointer"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+
+                {/* Confirm match indicator */}
+                {confirmPassword && (
+                  <div
+                    className={`mt-2 flex items-center gap-1.5 text-[11px] font-medium transition-colors ${
+                      password === confirmPassword ? 'text-[#249B70]' : 'text-[#D9535D]'
+                    }`}
+                  >
+                    {password === confirmPassword ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-[#249B70] shrink-0" />
+                        <span>Passwords match</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-3.5 w-3.5 text-[#D9535D] shrink-0" />
+                        <span>Passwords do not match</span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-500 py-2.5 px-4 text-xs font-bold text-slate-950 shadow-md shadow-teal-500/20 hover:bg-teal-400 transition-colors disabled:opacity-50 cursor-pointer"
+                disabled={
+                  isLoading ||
+                  !evaluatePasswordStrength(password).isCompliant ||
+                  password !== confirmPassword ||
+                  !name ||
+                  !email
+                }
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#368CE7] py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-[#368CE7]/20 hover:bg-[#2e79cc] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                {isLoading ? 'Creating Account...' : 'Register Client Account'}
+                {isLoading ? (
+                  <span>Creating Account...</span>
+                ) : (
+                  <>
+                    <span>Register Client Account</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
+
+              {!evaluatePasswordStrength(password).isCompliant && password.length > 0 && (
+                <p className="text-[10px] text-center text-[#647A91]">
+                  Password must satisfy all security requirements above to proceed.
+                </p>
+              )}
             </form>
           )}
 
@@ -414,7 +500,7 @@ export const LoginPage: React.FC = () => {
           {mode === 'forgot' && (
             <form onSubmit={handleForgot} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#243B53] mb-1.5">
                   Account Email Address
                 </label>
                 <input
@@ -423,14 +509,14 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@company.com"
                   required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:border-teal-500 focus:outline-none"
+                  className="w-full rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] py-2.5 px-3 text-xs text-[#243B53] placeholder-[#647A91] focus:border-[#368CE7] focus:bg-white focus:outline-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-500 py-2.5 px-4 text-xs font-bold text-slate-950 shadow-md shadow-teal-500/20 hover:bg-teal-400 transition-colors disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#368CE7] py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-[#368CE7]/20 hover:bg-[#2e79cc] transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? 'Sending Token...' : 'Dispatch Reset Token'}
               </button>
@@ -438,7 +524,7 @@ export const LoginPage: React.FC = () => {
           )}
 
           {/* Toggle between Login and Register */}
-          <div className="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-5 pt-4 border-t border-[#D9E8F5] flex items-center justify-between text-xs text-[#647A91]">
             {mode === 'login' ? (
               <>
                 <span>Need client access?</span>
@@ -449,7 +535,7 @@ export const LoginPage: React.FC = () => {
                     setError(null);
                     setSuccessMsg(null);
                   }}
-                  className="font-semibold text-teal-400 hover:text-teal-300 cursor-pointer"
+                  className="font-semibold text-[#368CE7] hover:text-[#2e79cc] cursor-pointer"
                 >
                   Create Account
                 </button>
@@ -464,7 +550,7 @@ export const LoginPage: React.FC = () => {
                     setError(null);
                     setSuccessMsg(null);
                   }}
-                  className="font-semibold text-teal-400 hover:text-teal-300 cursor-pointer"
+                  className="font-semibold text-[#368CE7] hover:text-[#2e79cc] cursor-pointer"
                 >
                   Back to Sign In
                 </button>
@@ -474,38 +560,38 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Quick Demo Credentials Footer Pills */}
-        <div className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/60 p-3">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-2">
+        <div className="mt-6 rounded-xl border border-[#D9E8F5] bg-white p-3 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-[#647A91] mb-2">
             <span className="flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
+              <ShieldCheck className="h-3.5 w-3.5 text-[#368CE7]" />
               DEMO ACCOUNTS (1-CLICK FILL):
             </span>
-            <span className="text-[10px] text-teal-400">Evaluator Mode</span>
+            <span className="text-[10px] text-[#368CE7] font-bold">Evaluator Mode</span>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => fillQuickCredentials('admin')}
-              className="rounded-lg bg-slate-950 border border-slate-800 py-2 px-1 text-center hover:border-teal-500/50 hover:bg-teal-500/5 transition-colors cursor-pointer"
+              className="rounded-lg bg-[#F4F9FF] border border-[#D9E8F5] py-2 px-1 text-center hover:border-[#368CE7] hover:bg-[#EAF4FF] transition-colors cursor-pointer"
             >
-              <p className="text-[11px] font-bold text-white">Admin</p>
-              <p className="text-[10px] text-slate-400 truncate">Elena Rostova</p>
+              <p className="text-[11px] font-bold text-[#243B53]">Admin</p>
+              <p className="text-[10px] text-[#647A91] truncate">Elena Rostova</p>
             </button>
             <button
               type="button"
               onClick={() => fillQuickCredentials('staff')}
-              className="rounded-lg bg-slate-950 border border-slate-800 py-2 px-1 text-center hover:border-teal-500/50 hover:bg-teal-500/5 transition-colors cursor-pointer"
+              className="rounded-lg bg-[#F4F9FF] border border-[#D9E8F5] py-2 px-1 text-center hover:border-[#368CE7] hover:bg-[#EAF4FF] transition-colors cursor-pointer"
             >
-              <p className="text-[11px] font-bold text-white">Staff</p>
-              <p className="text-[10px] text-slate-400 truncate">Sarah Jenkins</p>
+              <p className="text-[11px] font-bold text-[#243B53]">Staff</p>
+              <p className="text-[10px] text-[#647A91] truncate">Sarah Jenkins</p>
             </button>
             <button
               type="button"
               onClick={() => fillQuickCredentials('customer')}
-              className="rounded-lg bg-slate-950 border border-slate-800 py-2 px-1 text-center hover:border-teal-500/50 hover:bg-teal-500/5 transition-colors cursor-pointer"
+              className="rounded-lg bg-[#F4F9FF] border border-[#D9E8F5] py-2 px-1 text-center hover:border-[#368CE7] hover:bg-[#EAF4FF] transition-colors cursor-pointer"
             >
-              <p className="text-[11px] font-bold text-white">Client</p>
-              <p className="text-[10px] text-slate-400 truncate">Marcus Sterling</p>
+              <p className="text-[11px] font-bold text-[#243B53]">Client</p>
+              <p className="text-[10px] text-[#647A91] truncate">Marcus Sterling</p>
             </button>
           </div>
         </div>

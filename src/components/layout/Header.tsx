@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Zap, CheckCircle2, Sun, Moon, User as UserIcon } from 'lucide-react';
+import { Menu, Zap, CheckCircle2, User as UserIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
-import { useTheme } from '../../context/ThemeContext.tsx';
 import { api } from '../../services/api.ts';
 
 interface HeaderProps {
@@ -14,7 +13,6 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title, subtitle }) => {
   const { role, user } = useAuth();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const [isBillingRunning, setIsBillingRunning] = useState(false);
   const [billingToast, setBillingToast] = useState<string | null>(null);
 
@@ -34,70 +32,75 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title, subtitle
     }
   };
 
+  const getRoleBadgeClasses = (r: string) => {
+    switch (r) {
+      case 'ADMIN':
+        return 'bg-[#EAF4FF] text-[#368CE7] border-[#D9E8F5]';
+      case 'STAFF':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'CUSTOMER':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-[#E1E7EE] bg-white/95 px-4 backdrop-blur-md dark:border-slate-800 dark:bg-[#14243A]/95 sm:px-6 transition-colors duration-200">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-[#D9E8F5] bg-white/95 px-4 backdrop-blur-md sm:px-6 transition-colors duration-200">
       {/* Left: Mobile hamburger & breadcrumbs */}
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden"
+          className="rounded-lg p-2 text-[#647A91] hover:bg-[#F4F9FF] hover:text-[#243B53] lg:hidden cursor-pointer"
         >
           <Menu className="h-5 w-5" />
         </button>
 
         <div>
-          <h1 className="text-base font-bold text-[#1B2938] dark:text-white font-heading sm:text-lg">
+          <h1 className="text-base font-bold text-[#243B53] font-heading sm:text-lg">
             {title || 'Subscription & Revenue Intelligence'}
           </h1>
-          {subtitle && <p className="text-xs text-[#718096] dark:text-slate-400">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-[#647A91]">{subtitle}</p>}
         </div>
       </div>
 
-      {/* Right: Actions, Quick Billing, Theme Toggle and User Role indicator */}
+      {/* Right: Actions, AI Assistant shortcut, Quick Billing, and Profile */}
       <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Quick AI Assistant Shortcut */}
+        <button
+          onClick={() => navigate('/ai-assistant')}
+          title="Open AI Assistant"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#DCEEFF] bg-[#EAF4FF] px-2.5 py-1.5 text-xs font-semibold text-[#368CE7] hover:bg-[#DCEEFF] transition-colors cursor-pointer"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-[#368CE7]" />
+          <span>AI Assistant</span>
+        </button>
+
         {/* Quick Billing Action for Admin/Staff */}
         {role !== 'CUSTOMER' && (
           <button
             onClick={handleQuickBilling}
             disabled={isBillingRunning}
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#16A6A1]/30 bg-[#16A6A1]/10 px-3 py-1.5 text-xs font-semibold text-[#16A6A1] hover:bg-[#16A6A1]/20 transition-colors disabled:opacity-50"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-[#D9E8F5] bg-[#F4F9FF] px-3 py-1.5 text-xs font-semibold text-[#243B53] hover:bg-[#EAF4FF] hover:text-[#368CE7] transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <Zap className={`h-3.5 w-3.5 ${isBillingRunning ? 'animate-spin' : ''}`} />
+            <Zap className={`h-3.5 w-3.5 text-[#368CE7] ${isBillingRunning ? 'animate-spin' : ''}`} />
             <span>{isBillingRunning ? 'Billing Run...' : 'Run Billing Job'}</span>
           </button>
         )}
 
         {/* Currency badge */}
-        <div className="hidden md:flex items-center gap-1 rounded-md bg-[#F4F7FA] dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-[#1B2938] dark:text-slate-200 border border-[#E1E7EE] dark:border-slate-700">
+        <div className="hidden lg:flex items-center gap-1 rounded-lg bg-[#F4F9FF] px-2.5 py-1 text-xs font-medium text-[#243B53] border border-[#D9E8F5]">
           <span className="font-semibold">INR</span>
-          <span className="text-slate-400">|</span>
+          <span className="text-[#647A91]">|</span>
           <span>₹</span>
         </div>
 
-        {/* Dark/Light Theme Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E1E7EE] dark:border-slate-700 bg-[#F4F7FA] dark:bg-slate-800 text-[#1B2938] dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-4 w-4 text-amber-400 hover:rotate-45 transition-transform" />
-          ) : (
-            <Moon className="h-4 w-4 text-[#203A56] hover:-rotate-12 transition-transform" />
-          )}
-        </button>
-
         {/* Role badge */}
         <span
-          className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold tracking-wide uppercase border ${
-            role === 'ADMIN'
-              ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800'
-              : role === 'STAFF'
-              ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
-              : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
-          }`}
+          className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold tracking-wide uppercase border ${getRoleBadgeClasses(
+            role
+          )}`}
         >
           {role}
         </span>
@@ -105,21 +108,21 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title, subtitle
         {/* Profile Button */}
         <button
           onClick={() => navigate('/profile')}
-          title="User Profile & Contact Details"
+          title="User Profile & Security Management"
           aria-label="User Profile"
-          className="flex h-9 items-center gap-2 rounded-lg border border-[#E1E7EE] dark:border-slate-700 bg-[#F4F7FA] dark:bg-slate-800 px-2.5 text-xs font-semibold text-[#1B2938] dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          className="flex h-9 items-center gap-2 rounded-lg border border-[#D9E8F5] bg-[#F4F9FF] px-2.5 text-xs font-semibold text-[#243B53] hover:bg-[#EAF4FF] hover:border-[#368CE7] transition-colors cursor-pointer"
         >
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-500/20 text-[10px] font-bold text-teal-600 dark:text-teal-400">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#DCEEFF] text-[10px] font-bold text-[#368CE7]">
             {user?.name?.charAt(0) || 'U'}
           </div>
-          <span className="hidden md:inline max-w-[100px] truncate">{user?.name || 'Profile'}</span>
+          <span className="hidden md:inline max-w-[110px] truncate">{user?.name || 'Profile'}</span>
         </button>
       </div>
 
       {/* Quick toast notification */}
       {billingToast && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-[#14243A] px-4 py-3 text-xs font-medium text-white shadow-xl border border-slate-700 animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 className="h-4 w-4 text-[#16A6A1] shrink-0" />
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-medium text-[#243B53] shadow-xl border border-[#D9E8F5] animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="h-4 w-4 text-[#249B70] shrink-0" />
           <span>{billingToast}</span>
         </div>
       )}

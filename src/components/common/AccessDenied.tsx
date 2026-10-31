@@ -51,7 +51,7 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
   const getRoleBadgeStyle = (r: UserRole) => {
     switch (r) {
       case 'ADMIN':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-[#EAF4FF] text-[#368CE7] border-[#D9E8F5]';
       case 'STAFF':
         return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'CUSTOMER':
@@ -65,34 +65,34 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
 
   return (
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center p-4">
-      <div className="w-full max-w-xl rounded-2xl border border-[#E1E7EE] bg-white p-6 shadow-xl sm:p-8 dark:bg-[#14243A] dark:border-slate-800">
+      <div className="w-full max-w-xl rounded-2xl border border-[#D9E8F5] bg-white p-6 shadow-xl sm:p-8">
         
-        {/* Monetra Brand Watermark */}
-        <div className="flex items-center justify-between pb-6 border-b border-[#E1E7EE] dark:border-slate-800">
+        {/* Brand Header */}
+        <div className="flex items-center justify-between pb-6 border-b border-[#D9E8F5]">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#16A6A1] text-white">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#368CE7] text-white">
               <Zap className="h-4 w-4 fill-white" />
             </div>
-            <span className="text-sm font-bold text-[#14243A] dark:text-white font-heading">
-              MONETRA
+            <span className="text-sm font-bold text-[#243B53] font-heading">
+              NEXORA
             </span>
           </div>
-          <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-[#D64545] border border-rose-200 dark:bg-rose-950/50 dark:border-rose-900/50">
+          <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-[#D9535D] border border-rose-200">
             HTTP 403 FORBIDDEN
           </span>
         </div>
 
-        <div className="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-[#D64545] ring-8 ring-rose-50/50 dark:bg-rose-950/40 dark:ring-rose-950/20">
+        <div className="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-[#D9535D] ring-8 ring-rose-50/50">
           <ShieldAlert className="h-7 w-7" />
         </div>
 
         <div className="mt-5 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight text-[#1B2938] dark:text-white font-heading">
+          <h2 className="text-2xl font-extrabold tracking-tight text-[#243B53] font-heading">
             Access Denied
           </h2>
-          <p className="mt-2 text-sm text-[#718096] dark:text-slate-400">
+          <p className="mt-2 text-sm text-[#647A91]">
             Your account does not have permission to view or manage resources at{' '}
-            <code className="rounded-md bg-[#F4F7FA] px-2 py-0.5 font-mono text-xs font-semibold text-[#14243A] border border-[#E1E7EE] dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
+            <code className="rounded-md bg-[#F4F9FF] px-2 py-0.5 font-mono text-xs font-semibold text-[#243B53] border border-[#D9E8F5]">
               {path}
             </code>
             .
@@ -100,9 +100,9 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
         </div>
 
         {/* Roles Details */}
-        <div className="mt-6 rounded-xl border border-[#E1E7EE] bg-[#F4F7FA] p-4 space-y-3 dark:bg-slate-900/60 dark:border-slate-800">
+        <div className="mt-6 rounded-xl border border-[#D9E8F5] bg-[#F4F9FF] p-4 space-y-3">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-[#718096] dark:text-slate-400">Your Current Account Role:</span>
+            <span className="font-medium text-[#647A91]">Your Current Account Role:</span>
             <span
               className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-bold uppercase border ${getRoleBadgeStyle(
                 userRole
@@ -113,44 +113,43 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
           </div>
 
           <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-[#718096] dark:text-slate-400">Authorized Role(s):</span>
+            <span className="font-medium text-[#647A91]">Authorized Role(s):</span>
             <div className="flex flex-wrap items-center gap-1.5 justify-end">
               {requiredRoles.map((r) => (
                 <span
                   key={r}
-                  className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-bold uppercase border ${getRoleBadgeStyle(
-                    r
-                  )}`}
+                  className="rounded-md bg-white border border-[#D9E8F5] px-2 py-0.5 text-[11px] font-bold text-[#243B53]"
                 >
-                  {getRoleLabel(r)}
+                  {r}
                 </span>
               ))}
             </div>
           </div>
 
-          <p className="border-t border-[#E1E7EE] dark:border-slate-800 pt-2.5 text-[11px] text-[#718096] dark:text-slate-500">
-            Monetra Role-Based Access Control (RBAC) isolates internal revenue metrics, staff operational tools, and individual client accounts.
-          </p>
+          <div className="flex items-start gap-2 pt-2 border-t border-[#D9E8F5] text-xs text-[#647A91]">
+            <Lock className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#368CE7]" />
+            <span>
+              NEXORA enforces cryptographic role-based access control. Direct navigation to unauthorized paths is rejected.
+            </span>
+          </div>
         </div>
 
-        {/* Primary Return Button */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+        {/* Action Buttons */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
-            onClick={() => navigate(ownDashboard)}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#14243A] py-2.5 px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#203A56] dark:bg-[#16A6A1] dark:hover:bg-[#149692] transition-colors cursor-pointer"
+            onClick={() => navigate(ownDashboard, { replace: true })}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-[#368CE7] py-2.5 px-5 text-xs font-bold text-white shadow-md shadow-[#368CE7]/20 hover:bg-[#2e79cc] transition-colors cursor-pointer"
           >
             <Home className="h-4 w-4" />
-            <span>Return to {getRoleLabel(userRole)} Dashboard</span>
+            <span>Return to My Dashboard</span>
           </button>
-        </div>
 
-        <div className="mt-4 text-center">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#718096] hover:text-[#1B2938] dark:hover:text-white transition-colors cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-[#D9E8F5] bg-white py-2.5 px-4 text-xs font-semibold text-[#243B53] hover:bg-[#F4F9FF] transition-colors cursor-pointer"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span>Go back to previous page</span>
+            <ArrowLeft className="h-4 w-4" />
+            <span>Go Back</span>
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar.tsx';
 import { Header } from './Header.tsx';
+import { FloatingAIAssistant } from '../common/FloatingAIAssistant.tsx';
 
 export const AppLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -30,15 +31,16 @@ export const AppLayout: React.FC = () => {
     if (path.startsWith('/staff')) return { title: 'Staff Accounts & RBAC', subtitle: 'Manage permissions, customer assignments, and operational staff' };
     if (path.startsWith('/audit-logs')) return { title: 'Immutable Audit Trail', subtitle: 'Chronological timeline of financial operations and system events' };
     if (path.startsWith('/email-logs')) return { title: 'Email Dispatch & Delivery Logs', subtitle: 'System notifications, dunning sequences, and invoice receipts' };
-    if (path.startsWith('/ai-hub')) return { title: 'AI Studio & Revenue Intelligence Hub', subtitle: 'Gemini 3.8 Flash, 4 Argon, Live API voice, and audio speech-to-text transcription' };
+    if (path.startsWith('/ai-assistant') || path.startsWith('/ai-hub')) return { title: 'NEXORA AI Revenue Assistant', subtitle: 'Live database grounded answers with role-based access' };
     if (path.startsWith('/settings')) return { title: 'Platform Settings & Policies', subtitle: 'Accounting currency, tax rules, and billing retry tolerances' };
+    if (path.startsWith('/profile')) return { title: 'User Profile & Security Management', subtitle: 'Contact details, password validation, and credentials' };
     return { title: 'NEXORA Platform', subtitle: 'Subscription & Revenue Intelligence Platform' };
   };
 
   const { title, subtitle } = getPageInfo();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F4F7FA] dark:bg-[#0B132B] font-sans antialiased text-[#1B2938] dark:text-slate-100 transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-[#F4F9FF] font-sans antialiased text-[#243B53] transition-colors duration-200">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -54,6 +56,9 @@ export const AppLayout: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Floating AI Assistant Access Button & Drawer */}
+      <FloatingAIAssistant />
     </div>
   );
 };
