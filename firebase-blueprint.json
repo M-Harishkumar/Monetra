@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile document storing authentication identity and system RBAC role.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique Firebase user UID." },
+        "email": { "type": "string", "format": "email", "description": "User account email address." },
+        "name": { "type": "string", "description": "User display name." },
+        "role": { "type": "string", "enum": ["ADMIN", "STAFF", "CUSTOMER"], "description": "RBAC user role." },
+        "customerId": { "type": "string", "description": "Linked customer organization record ID, if applicable." },
+        "createdAt": { "type": "string", "description": "Creation timestamp." },
+        "updatedAt": { "type": "string", "description": "Last update timestamp." }
+      },
+      "required": ["id", "email", "name", "role", "createdAt"]
+    },
+    "chatMessage": {
+      "title": "ChatMessage",
+      "description": "A message item stored in user AI assistant conversation history.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique message ID." },
+        "userId": { "type": "string", "description": "Owner user UID." },
+        "sender": { "type": "string", "enum": ["user", "model", "system"], "description": "Message sender." },
+        "content": { "type": "string", "description": "Message text content." },
+        "model": { "type": "string", "description": "Gemini model used." },
+        "timestamp": { "type": "string", "description": "Timestamp ISO string." }
+      },
+      "required": ["id", "userId", "sender", "content", "timestamp"]
+    },
+    "audioTranscription": {
+      "title": "AudioTranscription",
+      "description": "Speech-to-text transcript record generated via gemini-3.5-transcribe.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique transcription ID." },
+        "userId": { "type": "string", "description": "Author user UID." },
+        "transcript": { "type": "string", "description": "Transcribed speech text." },
+        "language": { "type": "string", "description": "Detected or configured language." },
+        "createdAt": { "type": "string", "description": "Transcription timestamp." }
+      },
+      "required": ["id", "userId", "transcript", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User profiles indexed by Firebase Auth UID."
+    },
+    "/users/{userId}/chatMessages/{messageId}": {
+      "schema": "chatMessage",
+      "description": "User-specific conversation message thread history."
+    },
+    "/users/{userId}/audioTranscriptions/{transcriptionId}": {
+      "schema": "audioTranscription",
+      "description": "Persisted voice transcription history."
+    }
+  }
+}

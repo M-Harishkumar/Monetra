@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.tsx';
 import {
   LayoutDashboard,
@@ -11,7 +11,6 @@ import {
   Receipt,
   CreditCard,
   Scale,
-  Percent,
   ShieldAlert,
   Activity,
   CalendarClock,
@@ -23,8 +22,8 @@ import {
   Cog,
   Zap,
   LogOut,
-  ChevronRight,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -35,50 +34,61 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { role, user, switchRole, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/signin');
+  };
+
+  const handleRoleSwitch = async (r: 'ADMIN' | 'STAFF' | 'CUSTOMER') => {
+    await switchRole(r);
+    const targetDashboard =
+      r === 'ADMIN' ? '/admin/dashboard' : r === 'STAFF' ? '/staff/dashboard' : '/customer/dashboard';
+    navigate(targetDashboard);
   };
 
   const adminNav = [
     {
       group: 'OVERVIEW',
-      items: [{ name: 'Dashboard', path: '/', icon: LayoutDashboard }],
+      items: [
+        { name: 'Admin Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'AI Intelligence Hub', path: '/ai-hub', icon: Sparkles, badge: 'Gemini', highlight: true },
+      ],
     },
     {
       group: 'BUSINESS MANAGEMENT',
       items: [
-        { name: 'Customers', path: '/customers', icon: Users },
+        { name: 'Customer Management', path: '/customers', icon: Users },
         { name: 'Products & Variants', path: '/products', icon: Package },
         { name: 'Subscription Plans', path: '/plans', icon: Layers },
-        { name: 'Quotations', path: '/quotations', icon: FileSpreadsheet },
-        { name: 'Subscriptions', path: '/subscriptions', icon: Repeat, badge: 'Core' },
+        { name: 'Quotation Management', path: '/quotations', icon: FileSpreadsheet },
+        { name: 'Subscription Management', path: '/subscriptions', icon: Repeat, badge: 'Core' },
       ],
     },
     {
       group: 'FINANCIAL OPERATIONS',
       items: [
-        { name: 'Invoices', path: '/invoices', icon: Receipt },
-        { name: 'Payments & Ledger', path: '/payments', icon: CreditCard },
-        { name: 'Reconciliation', path: '/reconciliation', icon: Scale },
+        { name: 'Invoice Management', path: '/invoices', icon: Receipt },
+        { name: 'Payment Management', path: '/payments', icon: CreditCard },
+        { name: 'Payment Reconciliation', path: '/reconciliation', icon: Scale },
         { name: 'Recurring Billing', path: '/billing-engine', icon: Zap },
       ],
     },
     {
       group: 'REVENUE INTELLIGENCE',
       items: [
-        { name: 'Revenue Guard', path: '/revenue-guard', icon: ShieldAlert, badge: 'Alerts', highlight: true },
+        { name: 'Revenue Guard', path: '/revenue-guard', icon: ShieldAlert, badge: 'Alerts' },
         { name: 'Subscription Health', path: '/health-monitor', icon: Activity },
-        { name: 'Renewal Center', path: '/renewals', icon: CalendarClock },
+        { name: 'Renewal & Dunning', path: '/renewals', icon: CalendarClock },
         { name: 'Revenue Simulator', path: '/simulator', icon: SlidersHorizontal },
-        { name: 'Portfolio Intelligence', path: '/reports', icon: BarChart3 },
+        { name: 'Revenue Analytics', path: '/reports', icon: BarChart3 },
       ],
     },
     {
       group: 'ADMINISTRATION',
       items: [
-        { name: 'Staff Management', path: '/staff', icon: UserCheck },
+        { name: 'User & Staff Management', path: '/staff', icon: UserCheck },
         { name: 'Audit Logs', path: '/audit-logs', icon: History },
         { name: 'Email Delivery Logs', path: '/email-logs', icon: Mail },
         { name: 'System Settings', path: '/settings', icon: Cog },
@@ -89,24 +99,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const staffNav = [
     {
       group: 'OVERVIEW',
-      items: [{ name: 'Staff Dashboard', path: '/', icon: LayoutDashboard }],
+      items: [
+        { name: 'Staff Dashboard', path: '/staff/dashboard', icon: LayoutDashboard },
+        { name: 'AI Intelligence Hub', path: '/ai-hub', icon: Sparkles, badge: 'Gemini', highlight: true },
+      ],
     },
     {
       group: 'OPERATIONS',
       items: [
-        { name: 'Assigned Customers', path: '/customers', icon: Users },
-        { name: 'Quotations', path: '/quotations', icon: FileSpreadsheet },
-        { name: 'Subscriptions', path: '/subscriptions', icon: Repeat },
-        { name: 'Invoices', path: '/invoices', icon: Receipt },
-        { name: 'Record Payments', path: '/payments', icon: CreditCard },
-        { name: 'Reconciliation Assistant', path: '/reconciliation', icon: Scale },
+        { name: 'Customer Management', path: '/customers', icon: Users },
+        { name: 'Quotation Management', path: '/quotations', icon: FileSpreadsheet },
+        { name: 'Subscription Management', path: '/subscriptions', icon: Repeat },
+        { name: 'Invoice Management', path: '/invoices', icon: Receipt },
+        { name: 'Payment Recording', path: '/payments', icon: CreditCard },
+        { name: 'Payment Reconciliation', path: '/reconciliation', icon: Scale },
       ],
     },
     {
       group: 'REVENUE INTELLIGENCE',
       items: [
-        { name: 'Assigned Alerts', path: '/revenue-guard', icon: ShieldAlert, highlight: true },
-        { name: 'Renewal Center', path: '/renewals', icon: CalendarClock },
+        { name: 'Assigned Alerts', path: '/revenue-guard', icon: ShieldAlert },
+        { name: 'Renewal Monitoring', path: '/renewals', icon: CalendarClock },
         { name: 'Change Simulator', path: '/simulator', icon: SlidersHorizontal },
       ],
     },
@@ -116,11 +129,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       group: 'CUSTOMER PORTAL',
       items: [
-        { name: 'My Subscriptions', path: '/', icon: Repeat },
-        { name: 'Invoices & Receipts', path: '/invoices', icon: Receipt },
-        { name: 'Payment History', path: '/payments', icon: CreditCard },
-        { name: 'Quotations', path: '/quotations', icon: FileSpreadsheet },
-        { name: 'Plan Change Requests', path: '/simulator', icon: SlidersHorizontal },
+        { name: 'Customer Dashboard', path: '/customer/dashboard', icon: LayoutDashboard },
+        { name: 'AI Intelligence Hub', path: '/ai-hub', icon: Sparkles, badge: 'Gemini', highlight: true },
+        { name: 'Own Invoices & Receipts', path: '/invoices', icon: Receipt },
+        { name: 'Own Payment History', path: '/payments', icon: CreditCard },
+        { name: 'Own Quotations', path: '/quotations', icon: FileSpreadsheet },
+        { name: 'Subscription Changes', path: '/simulator', icon: SlidersHorizontal },
       ],
     },
   ];
@@ -159,21 +173,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Demo Fast Role Switcher */}
+        {/* Role Indicator & Demo Switcher */}
         <div className="px-4 py-3 bg-slate-900/90 border-b border-slate-800/60">
           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5">
             <span className="flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
               VIEW AS ROLE:
             </span>
-            <span className="text-teal-400 font-mono uppercase">{role}</span>
+            <span className="text-teal-400 font-mono uppercase font-bold">{role}</span>
           </div>
           <div className="grid grid-cols-3 gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800">
-            {(['ADMIN', 'STAFF', 'CUSTOMER'] as const).map(r => (
+            {(['ADMIN', 'STAFF', 'CUSTOMER'] as const).map((r) => (
               <button
                 key={r}
-                onClick={() => switchRole(r)}
-                className={`py-1 text-[11px] font-medium rounded-md transition-colors ${
+                onClick={() => handleRoleSwitch(r)}
+                className={`py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer ${
                   role === r
                     ? 'bg-teal-500 text-slate-950 font-bold shadow-xs'
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -189,24 +203,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
           {navSections.map((section, idx) => (
             <div key={idx}>
-              <p className="px-3 text-[10px] font-bold tracking-wider text-slate-300 uppercase">
+              <p className="px-3 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                 {section.group}
               </p>
               <div className="mt-2 space-y-1">
                 {section.items.map((item: any) => {
                   const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+
                   return (
                     <NavLink
                       key={item.path}
                       to={item.path}
-                      end={item.path === '/'}
                       onClick={onClose}
-                      className={({ isActive }) =>
+                      className={({ isActive: linkActive }) =>
                         `group flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                          isActive
+                          linkActive || isActive
                             ? 'bg-teal-500/15 text-teal-400 font-semibold'
                             : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-                        } ${item.highlight ? 'border border-amber-500/20 bg-amber-500/5 text-amber-300' : ''}`
+                        } ${item.highlight ? 'border border-teal-500/20 bg-teal-500/5 text-teal-300' : ''}`
                       }
                     >
                       <div className="flex items-center gap-3">
@@ -240,8 +255,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
             <button
               onClick={handleLogout}
-              title="Logout"
-              aria-label="Logout"
+              title="Sign Out"
+              aria-label="Sign Out"
               className="text-slate-400 hover:text-rose-400 p-1.5 rounded-md hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <LogOut className="h-4 w-4" />

@@ -192,6 +192,28 @@ export const api = {
   getSettings: () => request<any[]>('/settings'),
   saveSettings: (settings: any[]) =>
     request('/settings', { method: 'POST', body: JSON.stringify({ settings }) }),
+  loginWithGoogle: (payload: { uid: string; email: string; name: string; photoURL?: string }) =>
+    request<{ token: string; user: any }>('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  // AI & Speech Intelligence
+  sendChatMessage: (payload: {
+    model?: string;
+    systemInstruction?: string;
+    messages: any[];
+    message: string;
+  }) =>
+    request<{ text: string; model: string }>('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  transcribeAudio: (payload: { audio: string; mimeType: string }) =>
+    request<{ transcript: string; model: string }>('/ai/transcribe', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
 
 // Currency Formatting helper

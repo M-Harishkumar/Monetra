@@ -1,15 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types.ts';
 import { api, setAuthToken, setDemoRole, getDemoRole } from '../services/api.ts';
+import { auth, db, googleProvider } from '../firebase/config.ts';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
   role: UserRole;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: { email: string; password: string }) => Promise<void>;
-  logout: () => void;
-  switchRole: (role: UserRole) => Promise<void>;
+  login: (credentials: { email: string; password: string }) => Promise<User>;
+  loginWithGoogle: () => Promise<User>;
+  logout: () => Promise<void>;
+  switchRole: (role: UserRole) => Promise<User>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -47,30 +51,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchProfile();
   }, []);
 
-  const login = async (credentials: { email: string; password: string }) => {
+  const login = async (credentials: { email: string; password: string }): Promise<User> => {
     const res = await api.login(credentials);
     setAuthToken(res.token);
     setUser(res.user);
     setRoleState(res.user.role);
     setDemoRole(res.user.role);
+    return res.user;
   };
 
-  const logout = () => {
-    setAuthToken(null);
-    setUser(null);
-    setDemoRole('ADMIN');
-  };
-
-  const switchRole = async (targetRole: UserRole) => {
+  const loginWithGoogle = async (): Promise<User> => {
     try {
-      const res = await api.switchRole(targetRole);
+      const result = await signInWithPopup(auth, googleProvider);
+      const fbUser = result.user;
+
+      // 1. Sync / check profile in Firestore
+      let userRole: UserRole = 'CUSTOMER';
+      try {
+        const userDocRef = doc(db, 'users', fbUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          userRole = (userDoc.data().role as UserRole) || 'CUSTOMER';
+        } else {
+          const emailLower = (fbUser.email || '').toLowerCase();
+          if (emailLower.includes('admin') || emailLower.endsWith('@nexora.io')) {
+            userRole = 'ADMIN';
+          }
+          await setDoc(userDocRef, {
+            id: fbUser.uid,
+            email: fbUser.email || '',
+            name: fbUser.displayName || 'Google User',
+            role: userRole,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      } catch (firestoreErr) {
+        console.warn('Firestore profile sync note:', firestoreErr);
+      }
+
+      // 2. Sync with backend API to issue signed JWT
+      const res = await api.loginWithGoogle({
+        uid: fbUser.uid,
+        email: fbUser.email || '',
+        name: fbUser.displayName || '',
+        photoURL: fbUser.photoURL || undefined,
+      });
+
       setAuthToken(res.token);
       setUser(res.user);
       setRoleState(res.user.role);
       setDemoRole(res.user.role);
-    } catch (err) {
-      console.error('Failed to switch role:', err);
+      return res.user;
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+      throw new Error(err.message || 'Google authentication failed.');
     }
+  };
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      // ignore
+    }
+    setAuthToken(null);
+    setUser(null);
+    setDemoRole('ADMIN');
+    localStorage.removeItem('nexora_token');
+    localStorage.removeItem('nexora_demo_role');
+  };
+
+  const switchRole = async (targetRole: UserRole): Promise<User> => {
+    const res = await api.switchRole(targetRole);
+    setAuthToken(res.token);
+    setUser(res.user);
+    setRoleState(res.user.role);
+    setDemoRole(res.user.role);
+    return res.user;
   };
 
   return (
@@ -81,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         login,
+        loginWithGoogle,
         logout,
         switchRole,
         refreshProfile: fetchProfile,

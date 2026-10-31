@@ -10,7 +10,9 @@ export const AppLayout: React.FC = () => {
   // Page title mapping based on route
   const getPageInfo = () => {
     const path = location.pathname;
-    if (path === '/') return { title: 'Executive Overview & Financial KPI Dashboard', subtitle: 'Live metrics calculated from persistent records' };
+    if (path === '/' || path === '/admin/dashboard') return { title: 'Executive Overview & Financial KPI Dashboard', subtitle: 'Live metrics calculated from persistent records' };
+    if (path === '/staff/dashboard') return { title: 'Staff Operations & Accounts Dashboard', subtitle: 'Assigned customer portfolios, pending tasks, and recent operational activity' };
+    if (path === '/customer/dashboard') return { title: 'Customer Account & Subscription Portal', subtitle: 'Active services, recurring billing timeline, and payment receipts' };
     if (path.startsWith('/customers')) return { title: 'Customer Ledger & Accounts', subtitle: 'Manage accounts, subscription history, and outstanding receivables' };
     if (path.startsWith('/products')) return { title: 'Products & Multi-Tier Variants', subtitle: 'Software offerings, services, and seat-based add-ons' };
     if (path.startsWith('/plans')) return { title: 'Subscription Plans & Policy Rules', subtitle: 'Daily, weekly, monthly, and yearly recurring schedules' };
@@ -28,14 +30,15 @@ export const AppLayout: React.FC = () => {
     if (path.startsWith('/staff')) return { title: 'Staff Accounts & RBAC', subtitle: 'Manage permissions, customer assignments, and operational staff' };
     if (path.startsWith('/audit-logs')) return { title: 'Immutable Audit Trail', subtitle: 'Chronological timeline of financial operations and system events' };
     if (path.startsWith('/email-logs')) return { title: 'Email Dispatch & Delivery Logs', subtitle: 'System notifications, dunning sequences, and invoice receipts' };
+    if (path.startsWith('/ai-hub')) return { title: 'AI Studio & Revenue Intelligence Hub', subtitle: 'Gemini 3.8 Flash, 4 Argon, Live API voice, and audio speech-to-text transcription' };
     if (path.startsWith('/settings')) return { title: 'Platform Settings & Policies', subtitle: 'Accounting currency, tax rules, and billing retry tolerances' };
-    return { title: 'NEXORA Platform', subtitle: 'Enterprise Subscription & Revenue Intelligence' };
+    return { title: 'NEXORA Platform', subtitle: 'Subscription & Revenue Intelligence Platform' };
   };
 
   const { title, subtitle } = getPageInfo();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans antialiased text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-[#F4F7FA] dark:bg-[#0B132B] font-sans antialiased text-[#1B2938] dark:text-slate-100 transition-colors duration-200">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex flex-1 flex-col overflow-hidden">

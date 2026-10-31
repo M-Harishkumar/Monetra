@@ -15,7 +15,10 @@ test('RBAC matrix grants ADMIN full access across all routes', () => {
 test('RBAC matrix enforces strict STAFF boundaries', () => {
   // Allowed operational routes
   assert.equal(isRouteAllowedForRole('/', 'STAFF'), true);
+  assert.equal(isRouteAllowedForRole('/staff/dashboard', 'STAFF'), true);
+  assert.equal(isRouteAllowedForRole('/ai-hub', 'STAFF'), true);
   assert.equal(isRouteAllowedForRole('/customers', 'STAFF'), true);
+  assert.equal(isRouteAllowedForRole('/quotations', 'STAFF'), true);
   assert.equal(isRouteAllowedForRole('/subscriptions', 'STAFF'), true);
   assert.equal(isRouteAllowedForRole('/invoices', 'STAFF'), true);
   assert.equal(isRouteAllowedForRole('/payments', 'STAFF'), true);
@@ -25,8 +28,11 @@ test('RBAC matrix enforces strict STAFF boundaries', () => {
   assert.equal(isRouteAllowedForRole('/simulator', 'STAFF'), true);
 
   // Restricted administrative routes
+  assert.equal(isRouteAllowedForRole('/admin/dashboard', 'STAFF'), false);
+  assert.equal(isRouteAllowedForRole('/customer/dashboard', 'STAFF'), false);
   assert.equal(isRouteAllowedForRole('/products', 'STAFF'), false);
   assert.equal(isRouteAllowedForRole('/plans', 'STAFF'), false);
+  assert.equal(isRouteAllowedForRole('/billing-engine', 'STAFF'), false);
   assert.equal(isRouteAllowedForRole('/health-monitor', 'STAFF'), false);
   assert.equal(isRouteAllowedForRole('/reports', 'STAFF'), false);
   assert.equal(isRouteAllowedForRole('/staff', 'STAFF'), false);
@@ -38,12 +44,16 @@ test('RBAC matrix enforces strict STAFF boundaries', () => {
 test('RBAC matrix restricts CUSTOMER to portal routes only', () => {
   // Permitted customer routes
   assert.equal(isRouteAllowedForRole('/', 'CUSTOMER'), true);
+  assert.equal(isRouteAllowedForRole('/customer/dashboard', 'CUSTOMER'), true);
+  assert.equal(isRouteAllowedForRole('/ai-hub', 'CUSTOMER'), true);
   assert.equal(isRouteAllowedForRole('/invoices', 'CUSTOMER'), true);
   assert.equal(isRouteAllowedForRole('/payments', 'CUSTOMER'), true);
   assert.equal(isRouteAllowedForRole('/quotations', 'CUSTOMER'), true);
   assert.equal(isRouteAllowedForRole('/simulator', 'CUSTOMER'), true);
 
   // Restricted internal operations & admin routes
+  assert.equal(isRouteAllowedForRole('/admin/dashboard', 'CUSTOMER'), false);
+  assert.equal(isRouteAllowedForRole('/staff/dashboard', 'CUSTOMER'), false);
   assert.equal(isRouteAllowedForRole('/customers', 'CUSTOMER'), false);
   assert.equal(isRouteAllowedForRole('/products', 'CUSTOMER'), false);
   assert.equal(isRouteAllowedForRole('/plans', 'CUSTOMER'), false);
@@ -68,5 +78,6 @@ test('getAccessibleRoutesForRole returns filtered routes matching role permissio
   assert.equal(adminRoutes.length, ROUTE_PERMISSIONS.length);
   assert.ok(staffRoutes.length < adminRoutes.length);
   assert.ok(customerRoutes.length < staffRoutes.length);
-  assert.equal(customerRoutes.length, 5);
+  assert.equal(customerRoutes.length, 7);
+  assert.equal(staffRoutes.length, 12);
 });

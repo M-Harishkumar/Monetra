@@ -1,19 +1,17 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.tsx';
-import { AdminDashboard } from './AdminDashboard.tsx';
-import { StaffDashboard } from './StaffDashboard.tsx';
-import { CustomerPortal } from './CustomerPortal.tsx';
 
 export const DashboardRouter: React.FC = () => {
   const { role } = useAuth();
 
   if (role === 'STAFF') {
-    return <StaffDashboard />;
+    return <Navigate to="/staff/dashboard" replace />;
   }
 
   if (role === 'CUSTOMER') {
-    return <CustomerPortal />;
+    return <Navigate to="/customer/dashboard" replace />;
   }
 
-  return <AdminDashboard />;
+  return <Navigate to="/admin/dashboard" replace />;
 };
