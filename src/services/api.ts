@@ -85,6 +85,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ email }),
     }),
+  switchRole: (role: string) =>
+    request<{ token: string; user: any }>('/auth/switch-role', {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+    }),
   getMe: () => request<any>('/auth/me'),
 
   // Staff

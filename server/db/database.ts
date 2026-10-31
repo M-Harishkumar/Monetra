@@ -125,7 +125,24 @@ function loadOrInitDb(): DatabaseSchema {
   if (fs.existsSync(DB_FILE)) {
     try {
       const data = fs.readFileSync(DB_FILE, 'utf-8');
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      const seed = createSeedDatabase();
+      if (!parsed.quotationTemplates || parsed.quotationTemplates.length === 0) {
+        parsed.quotationTemplates = seed.quotationTemplates;
+      }
+      if (!parsed.discounts || parsed.discounts.length === 0) {
+        parsed.discounts = seed.discounts;
+      }
+      if (!parsed.taxRules || parsed.taxRules.length === 0) {
+        parsed.taxRules = seed.taxRules;
+      }
+      // Ensure Odoo Brand Edition variant is present
+      const odooVar = parsed.productVariants?.find((v: any) => v.id === 'VAR-002');
+      if (odooVar && odooVar.name !== 'Odoo Brand Edition') {
+        odooVar.name = 'Odoo Brand Edition';
+        odooVar.additionalPrice = 560.00;
+      }
+      return parsed;
     } catch (err) {
       console.warn('Error reading database file, reinitializing fresh seed data...', err);
     }
@@ -161,6 +178,17 @@ function createSeedDatabase(): DatabaseSchema {
       phone: '+1 (555) 019-2834',
       status: 'ACTIVE',
       createdAt: new Date(now.getTime() - 90 * 86400000).toISOString(),
+      updatedAt: now.toISOString(),
+    },
+    {
+      id: 'USR-ADMIN-02',
+      name: 'Vihashini S V',
+      email: 'vihashinisv.cs24@bitsathy.ac.in',
+      passwordHash: adminHash,
+      role: 'ADMIN',
+      phone: '+91 98765 43210',
+      status: 'ACTIVE',
+      createdAt: new Date(now.getTime() - 30 * 86400000).toISOString(),
       updatedAt: now.toISOString(),
     },
     {
@@ -462,7 +490,7 @@ function createSeedDatabase(): DatabaseSchema {
     {
       id: 'VAR-002',
       productId: 'PROD-001',
-      name: 'Professional Multi-Org',
+      name: 'Odoo Brand Edition',
       additionalPrice: 560.00,
       isDefault: false,
       status: 'ACTIVE',
@@ -664,6 +692,48 @@ function createSeedDatabase(): DatabaseSchema {
       perCustomerLimit: 1,
       usageCount: 25,
       status: 'EXPIRED',
+      createdAt: now.toISOString(),
+    },
+  // 7b. Quotation Templates (Scene: Sales rep starts from template with pre-configured plan and lines)
+  const quotationTemplates = [
+    {
+      id: 'QT-TMP-01',
+      name: 'Enterprise Full-Suite Template',
+      code: 'TMP-ENTERPRISE',
+      planId: 'PLAN-003', // Enterprise Scale
+      validityDays: 30,
+      defaultQuantity: 5,
+      paymentTerms: 'Net 30',
+      description: 'Pre-configured enterprise proposal including flagship core, dedicated SLA, and ERP connector.',
+      notes: 'Standard 30-day quote window with volume pricing applied.',
+      status: 'ACTIVE',
+      createdAt: now.toISOString(),
+    },
+    {
+      id: 'QT-TMP-02',
+      name: 'Growth SaaS with Odoo Brand Variant',
+      code: 'TMP-ODOO-GROWTH',
+      planId: 'PLAN-002', // Growth Pro
+      validityDays: 14,
+      defaultQuantity: 2,
+      variantId: 'VAR-002', // Odoo Brand Edition (+560)
+      paymentTerms: 'Net 15',
+      description: 'Mid-market growth package tailored with Odoo brand customization (+₹560/mo).',
+      notes: 'Ideal for Odoo ERP clients transitioning to recurring billing.',
+      status: 'ACTIVE',
+      createdAt: now.toISOString(),
+    },
+    {
+      id: 'QT-TMP-03',
+      name: 'Starter Cloud Launch Pilot',
+      code: 'TMP-STARTER-PILOT',
+      planId: 'PLAN-001', // Starter
+      validityDays: 7,
+      defaultQuantity: 1,
+      paymentTerms: 'Due Upon Receipt',
+      description: 'Turnkey pilot quotation valid for 7 calendar days for rapid onboarding.',
+      notes: 'Automated conversion to monthly billing upon confirmation.',
+      status: 'ACTIVE',
       createdAt: now.toISOString(),
     },
   ];
@@ -1330,7 +1400,7 @@ function createSeedDatabase(): DatabaseSchema {
     productVariants,
     plans,
     planProducts: [],
-    quotationTemplates: [],
+    quotationTemplates,
     quotationTemplateItems: [],
     quotations,
     quotationItems: [],

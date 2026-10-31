@@ -21,6 +21,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchProfile = async () => {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const profile = await api.getMe();
@@ -28,35 +35,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRoleState(profile.role);
       setDemoRole(profile.role);
     } catch (err) {
-      // In development, fallback to selected role's profile
-      const defaultRole = getDemoRole() as UserRole;
-      setRoleState(defaultRole);
-      if (defaultRole === 'ADMIN') {
-        setUser({
-          id: 'USR-ADMIN-01',
-          name: 'Elena Rostova',
-          email: 'admin@nexora.io',
-          role: 'ADMIN',
-          status: 'ACTIVE',
-        });
-      } else if (defaultRole === 'STAFF') {
-        setUser({
-          id: 'USR-STAFF-01',
-          name: 'Sarah Jenkins',
-          email: 'staff.sarah@nexora.io',
-          role: 'STAFF',
-          status: 'ACTIVE',
-        });
-      } else {
-        setUser({
-          id: 'USR-CUST-01',
-          name: 'Marcus Sterling',
-          email: 'customer@nexora.io',
-          role: 'CUSTOMER',
-          customerId: 'CUST-001',
-          status: 'ACTIVE',
-        });
-      }
+      // Invalid or expired token
+      setAuthToken(null);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -77,14 +58,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setAuthToken(null);
     setUser(null);
-    switchRole('ADMIN');
+    setDemoRole('ADMIN');
   };
 
   const switchRole = async (targetRole: UserRole) => {
-    setDemoRole(targetRole);
-    setRoleState(targetRole);
-    setAuthToken(null);
-    await fetchProfile();
+    try {
+      const res = await api.switchRole(targetRole);
+      setAuthToken(res.token);
+      setUser(res.user);
+      setRoleState(res.user.role);
+      setDemoRole(res.user.role);
+    } catch (err) {
+      console.error('Failed to switch role:', err);
+    }
   };
 
   return (

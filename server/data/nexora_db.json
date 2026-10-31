@@ -12,6 +12,17 @@
       "updatedAt": "2026-10-31T04:56:52.665Z"
     },
     {
+      "id": "USR-ADMIN-02",
+      "name": "Vihashini S V",
+      "email": "vihashinisv.cs24@bitsathy.ac.in",
+      "passwordHash": "$2b$10$2YwWBgrgCXANU9.5QvlJjuMnl4PlIFCJUMaPssTaZaeqK80.Ie1Fu",
+      "role": "ADMIN",
+      "phone": "+91 98765 43210",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-01T04:56:52.665Z",
+      "updatedAt": "2026-10-31T04:56:52.665Z"
+    },
+    {
       "id": "USR-STAFF-01",
       "name": "Sarah Jenkins",
       "email": "staff.sarah@nexora.io",
@@ -230,6 +241,62 @@
   ],
   "passwordResetTokens": [],
   "auditLogs": [
+    {
+      "id": "AUDIT-1793424795234-95",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-ADMIN-01",
+      "actorName": "Elena Rostova",
+      "actorRole": "ADMIN",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-ADMIN-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User admin@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T05:33:15.234Z"
+    },
+    {
+      "id": "AUDIT-1793423701450-287",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-STAFF-01",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "STAFF",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-STAFF-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User staff.sarah@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T05:15:01.450Z"
+    },
+    {
+      "id": "AUDIT-1793423680699-38",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-ADMIN-01",
+      "actorName": "Elena Rostova",
+      "actorRole": "ADMIN",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-ADMIN-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User admin@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T05:14:40.699Z"
+    },
+    {
+      "id": "AUDIT-1793423607139-492",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-ADMIN-02",
+      "actorName": "Vihashini S V",
+      "actorRole": "ADMIN",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-ADMIN-02",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User vihashinisv.cs24@bitsathy.ac.in signed in successfully.",
+      "createdAt": "2026-10-31T05:13:27.139Z"
+    },
     {
       "id": "AUDIT-1793422707175-13",
       "eventType": "REVENUE_GUARD_UPDATE_ALERT",
