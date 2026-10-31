@@ -92,6 +92,15 @@ export const api = {
     }),
   getMe: () => request<any>('/auth/me'),
 
+  // Profile & User Directory Management
+  getProfile: () => request<any>('/users/profile'),
+  getUserProfile: (id: string) => request<any>(`/users/${id}/profile`),
+  getAllUsers: () => request<any[]>('/users/all'),
+  updateProfile: (payload: any) =>
+    request<any>('/users/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+  updateUserProfile: (id: string, payload: any) =>
+    request<any>(`/users/${id}/profile`, { method: 'PUT', body: JSON.stringify(payload) }),
+
   // Staff
   getStaff: () => request<any[]>('/users/staff'),
   createStaff: (payload: any) =>

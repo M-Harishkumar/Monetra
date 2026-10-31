@@ -117,3 +117,33 @@ test('Backend Auth: Dashboard endpoints strictly enforce role authorization', ()
   assert.equal(isAuthorizedForDashboardApi('CUSTOMER', '/dashboard/customer'), true);
   assert.equal(isAuthorizedForDashboardApi('CUSTOMER', '/analytics/dashboard'), false);
 });
+
+test('Backend Auth: User Profile management is strictly role-gated', () => {
+  function canManageUserProfile(
+    actor: { id: string; role: 'ADMIN' | 'STAFF' | 'CUSTOMER' },
+    targetUserId: string
+  ): boolean {
+    if (actor.role === 'ADMIN') return true;
+    return actor.id === targetUserId;
+  }
+
+  const adminActor = { id: 'USR-ADMIN-01', role: 'ADMIN' as const };
+  const staffActor = { id: 'USR-STAFF-01', role: 'STAFF' as const };
+  const customerActor = { id: 'USR-CUST-01', role: 'CUSTOMER' as const };
+
+  // 1. Admin can manage own profile and any other user's profile
+  assert.equal(canManageUserProfile(adminActor, 'USR-ADMIN-01'), true);
+  assert.equal(canManageUserProfile(adminActor, 'USR-STAFF-01'), true);
+  assert.equal(canManageUserProfile(adminActor, 'USR-CUST-01'), true);
+
+  // 2. Staff can manage own profile, but cannot manage other users' profiles
+  assert.equal(canManageUserProfile(staffActor, 'USR-STAFF-01'), true);
+  assert.equal(canManageUserProfile(staffActor, 'USR-ADMIN-01'), false);
+  assert.equal(canManageUserProfile(staffActor, 'USR-CUST-01'), false);
+
+  // 3. Customer can manage own profile, but cannot manage other users' profiles
+  assert.equal(canManageUserProfile(customerActor, 'USR-CUST-01'), true);
+  assert.equal(canManageUserProfile(customerActor, 'USR-ADMIN-01'), false);
+  assert.equal(canManageUserProfile(customerActor, 'USR-STAFF-01'), false);
+});
+

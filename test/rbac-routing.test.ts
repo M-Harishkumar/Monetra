@@ -96,11 +96,14 @@ test('getAccessibleRoutesForRole returns filtered routes matching role permissio
   const customerRoutes = getAccessibleRoutesForRole('CUSTOMER');
 
   assert.equal(adminRoutes.length, ROUTE_PERMISSIONS.length - 2);
-  assert.equal(adminRoutes.length, 21);
+  assert.equal(adminRoutes.length, 22);
   assert.ok(staffRoutes.length < adminRoutes.length);
   assert.ok(customerRoutes.length < staffRoutes.length);
-  assert.equal(customerRoutes.length, 7);
-  assert.equal(staffRoutes.length, 12);
+  assert.equal(customerRoutes.length, 8);
+  assert.equal(staffRoutes.length, 13);
+  assert.equal(isRouteAllowedForRole('/profile', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/profile', 'STAFF'), true);
+  assert.equal(isRouteAllowedForRole('/profile', 'CUSTOMER'), true);
 });
 
 test('Strict Role-Based Dashboard Routing: Mutual Exclusivity', () => {

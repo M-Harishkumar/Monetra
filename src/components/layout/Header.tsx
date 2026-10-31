@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Menu, Zap, CheckCircle2, Sun, Moon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Menu, Zap, CheckCircle2, Sun, Moon, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useTheme } from '../../context/ThemeContext.tsx';
 import { api } from '../../services/api.ts';
@@ -11,7 +12,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title, subtitle }) => {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [isBillingRunning, setIsBillingRunning] = useState(false);
   const [billingToast, setBillingToast] = useState<string | null>(null);
@@ -99,6 +101,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title, subtitle
         >
           {role}
         </span>
+
+        {/* Profile Button */}
+        <button
+          onClick={() => navigate('/profile')}
+          title="User Profile & Contact Details"
+          aria-label="User Profile"
+          className="flex h-9 items-center gap-2 rounded-lg border border-[#E1E7EE] dark:border-slate-700 bg-[#F4F7FA] dark:bg-slate-800 px-2.5 text-xs font-semibold text-[#1B2938] dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+        >
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-500/20 text-[10px] font-bold text-teal-600 dark:text-teal-400">
+            {user?.name?.charAt(0) || 'U'}
+          </div>
+          <span className="hidden md:inline max-w-[100px] truncate">{user?.name || 'Profile'}</span>
+        </button>
       </div>
 
       {/* Quick toast notification */}

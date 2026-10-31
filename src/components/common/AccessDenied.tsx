@@ -17,7 +17,7 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, switchRole } = useAuth();
+  const { role } = useAuth();
 
   const userRole = currentRole || role;
   const path = attemptedPath || location.pathname;
@@ -137,24 +137,11 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({
         <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
           <button
             onClick={() => navigate(ownDashboard)}
-            className="flex w-full sm:flex-1 items-center justify-center gap-2 rounded-xl bg-[#14243A] py-2.5 px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#203A56] dark:bg-[#16A6A1] dark:hover:bg-[#149692] transition-colors cursor-pointer"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#14243A] py-2.5 px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#203A56] dark:bg-[#16A6A1] dark:hover:bg-[#149692] transition-colors cursor-pointer"
           >
             <Home className="h-4 w-4" />
             <span>Return to {getRoleLabel(userRole)} Dashboard</span>
           </button>
-
-          {/* Quick Demo Switch helper for convenience */}
-          {requiredRoles[0] && requiredRoles[0] !== userRole && (
-            <button
-              onClick={async () => {
-                await switchRole(requiredRoles[0]);
-                navigate(path);
-              }}
-              className="flex w-full sm:flex-1 items-center justify-center gap-2 rounded-xl border border-[#16A6A1]/40 bg-[#16A6A1]/10 py-2.5 px-4 text-xs font-semibold text-[#16A6A1] hover:bg-[#16A6A1]/20 transition-colors cursor-pointer"
-            >
-              <span>Switch to {getRoleLabel(requiredRoles[0])} (Demo)</span>
-            </button>
-          )}
         </div>
 
         <div className="mt-4 text-center">

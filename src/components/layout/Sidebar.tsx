@@ -24,6 +24,7 @@ import {
   LogOut,
   ShieldCheck,
   Sparkles,
+  User as UserIcon,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -32,20 +33,13 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { role, user, switchRole, logout } = useAuth();
+  const { role, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/signin');
-  };
-
-  const handleRoleSwitch = async (r: 'ADMIN' | 'STAFF' | 'CUSTOMER') => {
-    await switchRole(r);
-    const targetDashboard =
-      r === 'ADMIN' ? '/admin/dashboard' : r === 'STAFF' ? '/staff/dashboard' : '/customer/dashboard';
-    navigate(targetDashboard);
   };
 
   const adminNav = [
@@ -89,6 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       group: 'ADMINISTRATION',
       items: [
         { name: 'User & Staff Management', path: '/staff', icon: UserCheck },
+        { name: 'User Profile & Directory', path: '/profile', icon: UserIcon },
         { name: 'Audit Logs', path: '/audit-logs', icon: History },
         { name: 'Email Delivery Logs', path: '/email-logs', icon: Mail },
         { name: 'System Settings', path: '/settings', icon: Cog },
@@ -123,6 +118,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { name: 'Change Simulator', path: '/simulator', icon: SlidersHorizontal },
       ],
     },
+    {
+      group: 'ACCOUNT',
+      items: [
+        { name: 'My Profile', path: '/profile', icon: UserIcon },
+      ],
+    },
   ];
 
   const customerNav = [
@@ -135,10 +136,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { name: 'Own Payment History', path: '/payments', icon: CreditCard },
         { name: 'Own Quotations', path: '/quotations', icon: FileSpreadsheet },
         { name: 'Subscription Changes', path: '/simulator', icon: SlidersHorizontal },
+        { name: 'My Profile', path: '/profile', icon: UserIcon },
       ],
     },
   ];
 
+  // Strictly select navigation based on verified backend session role
   const navSections = role === 'ADMIN' ? adminNav : role === 'STAFF' ? staffNav : customerNav;
 
   return (
@@ -164,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <span className="text-lg font-bold tracking-tight text-white font-heading">
-                NEXORA
+                MONETRA
               </span>
               <span className="ml-1.5 rounded-sm bg-teal-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-teal-400 border border-teal-500/20">
                 PRO
@@ -173,29 +176,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Role Indicator & Demo Switcher */}
-        <div className="px-4 py-3 bg-slate-900/90 border-b border-slate-800/60">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5">
-            <span className="flex items-center gap-1">
+        {/* Verified Authentication Session Role Badge (Read-Only, No Role Switcher) */}
+        <div className="px-5 py-3 bg-slate-900/60 border-b border-slate-800/60">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
-              VIEW AS ROLE:
+              SESSION ROLE:
             </span>
-            <span className="text-teal-400 font-mono uppercase font-bold">{role}</span>
-          </div>
-          <div className="grid grid-cols-3 gap-1 p-0.5 bg-slate-950 rounded-lg border border-slate-800">
-            {(['ADMIN', 'STAFF', 'CUSTOMER'] as const).map((r) => (
-              <button
-                key={r}
-                onClick={() => handleRoleSwitch(r)}
-                className={`py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer ${
-                  role === r
-                    ? 'bg-teal-500 text-slate-950 font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                }`}
-              >
-                {r === 'CUSTOMER' ? 'Client' : r.charAt(0) + r.slice(1).toLowerCase()}
-              </button>
-            ))}
+            <span
+              className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border ${
+                role === 'ADMIN'
+                  ? 'bg-purple-950/60 text-purple-300 border-purple-800'
+                  : role === 'STAFF'
+                  ? 'bg-blue-950/60 text-blue-300 border-blue-800'
+                  : 'bg-emerald-950/60 text-emerald-300 border-emerald-800'
+              }`}
+            >
+              {role === 'CUSTOMER' ? 'Customer' : role}
+            </span>
           </div>
         </div>
 
@@ -244,15 +242,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {/* User Card & Logout Footer */}
         <div className="p-4 border-t border-slate-800/80 bg-slate-950">
           <div className="flex items-center justify-between rounded-xl p-2.5 bg-slate-900/60 border border-slate-800">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300 font-bold text-xs border border-teal-500/30">
+            <button
+              onClick={() => {
+                navigate('/profile');
+                onClose();
+              }}
+              title="View and edit profile"
+              className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-80 transition-opacity cursor-pointer group"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300 font-bold text-xs border border-teal-500/30 group-hover:border-teal-400">
                 {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-white">{user?.name || 'User'}</p>
+                <p className="truncate text-xs font-semibold text-white group-hover:text-teal-300 transition-colors">
+                  {user?.name || 'User'}
+                </p>
                 <p className="truncate text-[10px] text-slate-400">{user?.email}</p>
               </div>
-            </div>
+            </button>
             <button
               onClick={handleLogout}
               title="Sign Out"

@@ -37,6 +37,22 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   const hasAccess = allowedRoles.includes(effectiveRole);
 
   if (!hasAccess) {
+    // If user attempted to access another role's dashboard URL directly, redirect directly to their own authorized dashboard
+    const isDashboardPath =
+      location.pathname === '/admin/dashboard' ||
+      location.pathname === '/staff/dashboard' ||
+      location.pathname === '/customer/dashboard';
+
+    if (isDashboardPath) {
+      const authorizedDashboard =
+        effectiveRole === 'ADMIN'
+          ? '/admin/dashboard'
+          : effectiveRole === 'STAFF'
+          ? '/staff/dashboard'
+          : '/customer/dashboard';
+      return <Navigate to={authorizedDashboard} replace />;
+    }
+
     if (fallback) {
       return <>{fallback}</>;
     }

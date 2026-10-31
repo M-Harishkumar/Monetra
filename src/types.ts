@@ -8,6 +8,17 @@ export interface User {
   phone?: string | null;
   customerId?: string | null;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  title?: string | null;
+  department?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  postalCode?: string | null;
+  bio?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  customer?: any | null;
 }
 
 export interface Customer {

@@ -31,6 +31,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/audit-logs', allowedRoles: ['ADMIN'], label: 'Audit Logs', category: 'ADMINISTRATION' },
   { path: '/email-logs', allowedRoles: ['ADMIN'], label: 'Email Logs', category: 'ADMINISTRATION' },
   { path: '/settings', allowedRoles: ['ADMIN'], label: 'System Settings', category: 'ADMINISTRATION' },
+  { path: '/profile', allowedRoles: ['ADMIN', 'STAFF', 'CUSTOMER'], label: 'User Profile', category: 'OVERVIEW' },
 ];
 
 /**

@@ -333,11 +333,206 @@ router.get('/auth/me', authMiddleware, (req: Request, res: Response) => {
     name: user.name,
     email: user.email,
     role: user.role,
-    phone: user.phone,
+    phone: user.phone || null,
+    title: user.title || null,
+    department: user.department || null,
+    address: user.address || (customer ? customer.billingAddress : null),
+    city: user.city || (customer ? customer.city : null),
+    state: user.state || (customer ? customer.state : null),
+    country: user.country || (customer ? customer.country : 'United States'),
+    postalCode: user.postalCode || (customer ? customer.postalCode : null),
+    bio: user.bio || null,
+    status: user.status || 'ACTIVE',
     customerId: user.customerId,
     customer,
   });
 });
+
+// User Profile Retrieval (Self or Admin)
+router.get('/users/profile', authMiddleware, (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const db = getDb();
+  const user = db.users.find(u => u.id === authUser.id);
+  if (!user) {
+    return sendError(res, 'User record not found.', 'NOT_FOUND', 404);
+  }
+
+  let customer = null;
+  if (user.customerId) {
+    customer = db.customers.find(c => c.id === user.customerId);
+  }
+
+  const { passwordHash: _, ...safeUser } = user;
+  return sendSuccess(res, {
+    ...safeUser,
+    customer,
+  });
+});
+
+// Admin-Only: Retrieve all users for directory & profile administration
+router.get('/users/all', authMiddleware, requireRole('ADMIN'), (_req: Request, res: Response) => {
+  const db = getDb();
+  const allUsers = db.users.map(({ passwordHash, ...safeUser }) => {
+    let customer = null;
+    if (safeUser.customerId) {
+      customer = db.customers.find(c => c.id === safeUser.customerId);
+    }
+    return {
+      ...safeUser,
+      customer,
+    };
+  });
+  return sendSuccess(res, allUsers);
+});
+
+// Get Specific User Profile by ID (Strict Role-Gated)
+router.get('/users/:id/profile', authMiddleware, (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const targetId = req.params.id;
+  const db = getDb();
+
+  // Role gating: Only ADMIN or the user themselves can view this profile
+  if (authUser.role !== 'ADMIN' && authUser.id !== targetId) {
+    return sendError(res, 'You do not have permission to view other users\' profiles.', 'FORBIDDEN', 403);
+  }
+
+  const user = db.users.find(u => u.id === targetId);
+  if (!user) {
+    return sendError(res, 'User not found.', 'NOT_FOUND', 404);
+  }
+
+  let customer = null;
+  if (user.customerId) {
+    customer = db.customers.find(c => c.id === user.customerId);
+  }
+
+  const { passwordHash: _, ...safeUser } = user;
+  return sendSuccess(res, {
+    ...safeUser,
+    customer,
+  });
+});
+
+// Update Current User's Profile (Self)
+router.put('/users/profile', authMiddleware, (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const db = getDb();
+  const user = db.users.find(u => u.id === authUser.id);
+  if (!user) {
+    return sendError(res, 'User not found.', 'NOT_FOUND', 404);
+  }
+
+  const { name, phone, title, department, address, city, state, country, postalCode, bio } = req.body;
+
+  if (name !== undefined) user.name = String(name).trim();
+  if (phone !== undefined) user.phone = String(phone).trim();
+  if (title !== undefined) user.title = String(title).trim();
+  if (department !== undefined) user.department = String(department).trim();
+  if (address !== undefined) user.address = String(address).trim();
+  if (city !== undefined) user.city = String(city).trim();
+  if (state !== undefined) user.state = String(state).trim();
+  if (country !== undefined) user.country = String(country).trim();
+  if (postalCode !== undefined) user.postalCode = String(postalCode).trim();
+  if (bio !== undefined) user.bio = String(bio).trim();
+  user.updatedAt = new Date().toISOString();
+
+  // Synchronize contact details to customer record if applicable
+  if (user.customerId) {
+    const cust = db.customers.find(c => c.id === user.customerId);
+    if (cust) {
+      if (phone !== undefined) cust.phone = user.phone;
+      if (address !== undefined) cust.billingAddress = user.address;
+      if (city !== undefined) cust.city = user.city;
+      if (state !== undefined) cust.state = user.state;
+      if (country !== undefined) cust.country = user.country;
+      if (postalCode !== undefined) cust.postalCode = user.postalCode;
+    }
+  }
+
+  saveDb();
+
+  logAudit(
+    authUser,
+    'update_profile',
+    'user',
+    user.id,
+    `User ${authUser.name} updated their own contact profile.`
+  );
+
+  const { passwordHash: _, ...safeUser } = user;
+  return sendSuccess(res, safeUser, 'Profile updated successfully.');
+});
+
+// Update Target User Profile (Role-Gated: Admin can update anyone, Customers/Staff can only update self)
+router.put('/users/:id/profile', authMiddleware, (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const targetId = req.params.id;
+  const db = getDb();
+
+  // Strict role check: Non-admins can NEVER edit other users' profiles
+  if (authUser.role !== 'ADMIN' && authUser.id !== targetId) {
+    return sendError(
+      res,
+      'You do not have permission to modify other users\' profiles.',
+      'FORBIDDEN',
+      403
+    );
+  }
+
+  const user = db.users.find(u => u.id === targetId);
+  if (!user) {
+    return sendError(res, 'User record not found.', 'NOT_FOUND', 404);
+  }
+
+  const { name, phone, title, department, address, city, state, country, postalCode, bio, status } = req.body;
+
+  if (name !== undefined) user.name = String(name).trim();
+  if (phone !== undefined) user.phone = String(phone).trim();
+  if (title !== undefined) user.title = String(title).trim();
+  if (department !== undefined) user.department = String(department).trim();
+  if (address !== undefined) user.address = String(address).trim();
+  if (city !== undefined) user.city = String(city).trim();
+  if (state !== undefined) user.state = String(state).trim();
+  if (country !== undefined) user.country = String(country).trim();
+  if (postalCode !== undefined) user.postalCode = String(postalCode).trim();
+  if (bio !== undefined) user.bio = String(bio).trim();
+
+  // Only admin can change user status
+  if (authUser.role === 'ADMIN' && status !== undefined) {
+    user.status = status;
+  }
+
+  user.updatedAt = new Date().toISOString();
+
+  // Sync to customer record if applicable
+  if (user.customerId) {
+    const cust = db.customers.find(c => c.id === user.customerId);
+    if (cust) {
+      if (phone !== undefined) cust.phone = user.phone;
+      if (address !== undefined) cust.billingAddress = user.address;
+      if (city !== undefined) cust.city = user.city;
+      if (state !== undefined) cust.state = user.state;
+      if (country !== undefined) cust.country = user.country;
+      if (postalCode !== undefined) cust.postalCode = user.postalCode;
+    }
+  }
+
+  saveDb();
+
+  logAudit(
+    authUser,
+    'update_user_profile',
+    'user',
+    user.id,
+    authUser.id === user.id
+      ? `User ${authUser.name} updated their profile.`
+      : `Administrator ${authUser.name} updated profile for user ${user.name} (${user.id}).`
+  );
+
+  const { passwordHash: _, ...safeUser } = user;
+  return sendSuccess(res, safeUser, 'Profile updated successfully.');
+});
+
 
 // -------------------------------------------------------------
 // 2. STAFF MANAGEMENT (Admin only)

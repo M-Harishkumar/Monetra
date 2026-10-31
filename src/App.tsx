@@ -29,6 +29,7 @@ import { EmailLogsPage } from './pages/email/EmailLogsPage.tsx';
 import { SettingsPage } from './pages/settings/SettingsPage.tsx';
 import { LoginPage } from './pages/auth/LoginPage.tsx';
 import { AIHubPage } from './pages/ai/AIHubPage.tsx';
+import { ProfilePage } from './pages/profile/ProfilePage.tsx';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -290,6 +291,14 @@ export function App() {
                 element={
                   <RoleGuard allowedRoles={['ADMIN']}>
                     <SettingsPage />
+                  </RoleGuard>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
+                    <ProfilePage />
                   </RoleGuard>
                 }
               />
