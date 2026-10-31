@@ -1,0 +1,1879 @@
+# COMPLETE MASTER DEVELOPMENT PROMPT
+# NEXORA – Subscription & Revenue Intelligence Platform
+
+## PROJECT IDENTITY
+
+**Project Name:** NEXORA
+
+**Product Category:** Subscription Management and Revenue Intelligence Platform
+
+**Tagline:** Every Subscription. Every Renewal. Every Revenue Opportunity.
+
+**Project Type:** Full-stack SaaS web application
+
+Act as a senior software architect, full-stack developer, database engineer, financial systems designer, UI/UX designer, and quality assurance engineer.
+
+Your task is to design and develop a complete, functional, professional-grade application called **NEXORA – Subscription & Revenue Intelligence Platform**.
+
+NEXORA is designed for SaaS businesses that sell software subscriptions with daily, weekly, monthly, and yearly billing cycles, along with product variants, add-ons, discounts, taxes, and recurring services.
+
+The platform must unify the complete subscription business lifecycle, from product creation and quotations to subscription activation, automated recurring billing, invoice management, payment reconciliation, renewal monitoring, and financial intelligence.
+
+**This must be a genuinely functional application, not just a frontend prototype, static dashboard, or collection of disconnected screens.**
+
+All major modules must communicate with a real backend and MySQL database.
+
+---
+
+# 1. PROBLEM STATEMENT
+
+SaaS businesses often manage subscriptions, renewals, invoices, payments, discounts, and financial reports using separate tools, spreadsheets, and manual processes.
+
+This creates problems such as:
+
+- Missed subscription renewals.
+- Delayed invoice generation.
+- Duplicate or incorrect invoices.
+- Manual payment matching.
+- Revenue leakage.
+- Difficulty tracking outstanding payments.
+- Poor visibility into subscription performance.
+- Inconsistent customer communication.
+- Time-consuming financial reporting.
+- Lack of a centralized subscription management system.
+
+NEXORA aims to solve these problems through a unified subscription and revenue intelligence platform.
+
+## Proposed solution
+
+Develop a centralized platform that provides:
+
+1. Product and subscription plan management.
+2. Customer and quotation management.
+3. Complete subscription lifecycle management.
+4. Automated recurring invoice generation.
+5. Tax and discount management.
+6. Payment recording and reconciliation.
+7. Renewal reminders and overdue notifications.
+8. Revenue leakage detection.
+9. Subscription health monitoring.
+10. Revenue simulation and business analytics.
+
+## Unique Selling Proposition
+
+Unlike a conventional subscription management system, NEXORA does not stop at managing subscriptions and generating invoices.
+
+It actively helps businesses identify potential revenue leakage, understand subscription health, monitor renewal risks, reconcile payments, and explore future revenue scenarios.
+
+---
+
+# 2. TECHNOLOGY STACK
+
+Use the following technology stack consistently.
+
+## Frontend
+- React.js.
+- Vite.
+- JavaScript.
+- Tailwind CSS.
+- React Router DOM.
+- Axios.
+- React Hook Form.
+- Zod.
+- Recharts.
+- Lucide React.
+
+## Backend
+- Node.js.
+- Express.js.
+- RESTful APIs.
+- Prisma ORM.
+- JWT authentication.
+- bcrypt password hashing.
+- Nodemailer for email notifications.
+- PDFKit for PDF generation.
+- node-cron for scheduled background tasks.
+
+## Database
+- MySQL 8.0.16 or later.
+- InnoDB.
+- utf8mb4.
+- Relational database architecture.
+- Foreign keys.
+- Unique constraints.
+- Check constraints where supported.
+- Indexes.
+- Database transactions.
+
+Do not replace MySQL with MongoDB, Firebase, Supabase, or PostgreSQL.
+
+Do not introduce additional frameworks unless they solve a clearly identified requirement.
+
+---
+
+# 3. APPLICATION ARCHITECTURE
+
+Build the application using a modular three-layer architecture.
+
+### Frontend layer
+Responsible for:
+- User interface.
+- Navigation.
+- Forms.
+- Tables.
+- Dashboards.
+- Charts.
+- Input validation.
+- API communication.
+- Loading and error states.
+
+### Backend layer
+Responsible for:
+- Authentication.
+- Authorization.
+- Business logic.
+- API endpoints.
+- Billing calculations.
+- Payment processing records.
+- Notifications.
+- Validation.
+- Background jobs.
+
+### Database layer
+Responsible for:
+- Persistent storage.
+- Relationships.
+- Data integrity.
+- Financial records.
+- Transaction safety.
+- Audit history.
+
+Separate controllers, services, routes, validators, and database operations.
+
+Never place all application logic in a single file.
+
+---
+
+# 4. UI/UX DESIGN SYSTEM
+
+Create a sophisticated enterprise SaaS interface.
+
+The application should look like a professionally designed financial technology product.
+
+Avoid generic AI-generated dashboard styling.
+
+## Visual identity
+
+Use:
+- Deep navy or charcoal for primary navigation.
+- White and light neutral backgrounds.
+- Restrained teal, blue, and violet accents.
+- Subtle borders and shadows.
+- Moderate corner radii.
+- Clear spacing.
+- Consistent alignment.
+- Professional typography.
+
+## Typography
+
+Use:
+- Manrope or Plus Jakarta Sans for headings.
+- Inter for body content.
+- Inter tabular numerals for financial values.
+
+Use distinct font weights and sizes for headings, descriptions, labels, numbers, and tables.
+
+## Layout
+
+Implement:
+- Collapsible sidebar.
+- Top navigation bar.
+- Breadcrumbs.
+- Global search.
+- Notification center.
+- User profile menu.
+- Main content area.
+- Responsive dashboard cards.
+- Consistent data tables.
+- Modal dialogs.
+- Toast notifications.
+
+## Responsive design
+
+Support:
+- Desktop.
+- Laptop.
+- Tablet.
+- Mobile.
+
+Tables must have appropriate mobile handling.
+
+Use responsive navigation and avoid horizontal overflow.
+
+## Interaction states
+
+Every module must include:
+- Loading state.
+- Success state.
+- Error state.
+- Empty state.
+- Confirmation dialog where necessary.
+- Disabled state for unavailable actions.
+
+Do not create decorative buttons that do nothing.
+
+Every visible action must perform its advertised function.
+
+---
+
+# 5. USER ROLES AND ACCESS CONTROL
+
+Implement three user roles.
+
+## Admin
+
+Admin has complete access.
+
+Permissions:
+- Manage staff.
+- Manage customers.
+- Manage products.
+- Manage subscription plans.
+- Manage quotations.
+- Manage subscriptions.
+- Manage invoices.
+- Manage payments.
+- Manage taxes.
+- Manage discounts.
+- Access Revenue Guard.
+- Access Subscription Health.
+- Manage renewals.
+- Access reconciliation.
+- Access analytics.
+- Access audit logs.
+- Configure application settings.
+
+Only admins can create staff accounts.
+
+## Staff
+
+Staff can:
+- View assigned customers.
+- Create and manage permitted customers.
+- Create quotations.
+- Manage subscriptions.
+- Generate and manage invoices.
+- Record payments.
+- View permitted reports.
+- Investigate Revenue Guard alerts.
+- Perform authorized reconciliation tasks.
+
+Staff cannot:
+- Create other staff accounts.
+- Change system-level settings.
+- Access restricted financial administration features.
+
+## Customer
+
+Customers can:
+- View their own profile.
+- View their subscriptions.
+- View quotations.
+- Accept or reject quotations.
+- View invoices.
+- Download invoice PDFs.
+- View payment history.
+- View outstanding balances.
+- View upcoming renewals.
+- Request permitted subscription changes.
+- Request cancellation.
+- Update permitted profile information.
+
+Enforce permissions on the backend.
+
+Never trust frontend-only role restrictions.
+
+A customer must never access another customer's data by changing a URL, request parameter, or record ID.
+
+---
+
+# 6. AUTHENTICATION AND ACCOUNT MANAGEMENT
+
+Implement secure authentication.
+
+## Registration
+
+Fields:
+- Full name.
+- Email.
+- Password.
+- Confirm password.
+
+Validation:
+- Unique email.
+- Minimum 9-character password.
+- At least one uppercase letter.
+- At least one lowercase letter.
+- At least one special character.
+
+## Login
+- Email and password.
+- JWT-based authentication.
+- Protected routes.
+- Logout.
+- Secure token handling.
+
+## Forgot password
+- Enter registered email.
+- Generate a secure, single-use, time-limited token.
+- Send reset link through email.
+- Allow password reset.
+- Invalidate token after use.
+
+Never store plain-text passwords or password reset tokens.
+
+---
+
+# 7. DASHBOARDS
+
+Create separate dashboards for each role.
+
+## Admin dashboard
+
+Display:
+- Total customers.
+- Total subscriptions.
+- Active subscriptions.
+- New subscriptions.
+- Monthly Recurring Revenue (MRR).
+- Annual Recurring Revenue (ARR).
+- Revenue collected.
+- Outstanding balance.
+- Overdue invoices.
+- Upcoming renewals.
+- Subscription cancellations.
+- Revenue growth.
+- Subscription growth.
+- Recent transactions.
+- Revenue Guard alerts.
+- At-risk subscriptions.
+
+Filters:
+- Today.
+- Last 7 days.
+- Last 30 days.
+- This month.
+- Last month.
+- This quarter.
+- This year.
+- Custom date range.
+
+## Staff dashboard
+
+Display:
+- Assigned customers.
+- Active subscriptions.
+- Pending quotations.
+- Pending invoices.
+- Upcoming renewals.
+- Overdue payments.
+- Recent activities.
+- Assigned Revenue Guard alerts.
+
+## Customer dashboard
+
+Display:
+- Active subscriptions.
+- Current plan.
+- Next renewal date.
+- Next invoice amount.
+- Outstanding balance.
+- Recent invoices.
+- Payment history.
+- Available add-ons.
+- Subscription status.
+
+All dashboard values must be calculated from actual database records.
+
+---
+
+# 8. CUSTOMER MANAGEMENT
+
+Customer fields:
+- Customer ID.
+- Customer name.
+- Email.
+- Phone number.
+- Company name.
+- Billing address.
+- Tax identification number.
+- Country.
+- State.
+- City.
+- Postal code.
+- Registration date.
+- Account status.
+
+Features:
+- Create customer.
+- Edit customer.
+- View customer.
+- Deactivate customer.
+- Search.
+- Filter.
+- Sort.
+- Pagination.
+- View subscription history.
+- View invoices.
+- View payments.
+- View customer activity.
+
+Do not delete customer records that have financial history.
+
+---
+
+# 9. PRODUCT AND VARIANT MANAGEMENT
+
+Product fields:
+- Product name.
+- Product type.
+- Sales price.
+- Cost price.
+- Description.
+- Internal notes.
+- Product status.
+
+Support product variants and add-ons.
+
+Example:
+
+Product: Odoo Software
+
+| Variant | Additional Price |
+|---|---:|
+| Basic | ₹0 |
+| Premium | ₹560 |
+| Enterprise | ₹1,200 |
+
+Features:
+- Create products.
+- Add variants.
+- Set additional prices.
+- Edit product details.
+- Activate/deactivate products.
+- Search and filter.
+- Associate products with subscription plans.
+
+Use DECIMAL for all monetary values.
+
+---
+
+# 10. SUBSCRIPTION PLAN MANAGEMENT
+
+Plan fields:
+- Plan name.
+- Description.
+- Billing price.
+- Billing frequency.
+- Minimum quantity.
+- Available from.
+- Available until.
+- Associated products.
+- Associated variants.
+- Plan status.
+
+Billing frequencies:
+- Daily.
+- Weekly.
+- Monthly.
+- Yearly.
+
+Plan policies:
+- Allow automatic closure.
+- Allow early closure.
+- Allow pause.
+- Allow renewal.
+- Allow upgrades.
+- Allow downgrades.
+
+Features:
+- Create plans.
+- Edit plans.
+- Archive plans.
+- Associate products.
+- Configure billing rules.
+- View subscribers.
+- View plan revenue.
+
+Implement calendar-aware billing calculations.
+
+Handle:
+- Different month lengths.
+- Leap years.
+- Month-end renewals.
+- Yearly renewal dates.
+
+Document the billing-date policy and use it consistently.
+
+---
+
+# 11. QUOTATION MANAGEMENT
+
+Quotation fields:
+- Quotation number.
+- Customer.
+- Quotation date.
+- Expiry date.
+- Payment terms.
+- Product lines.
+- Subscription plan.
+- Quantity.
+- Unit price.
+- Taxes.
+- Discounts.
+- Subtotal.
+- Total amount.
+- Notes.
+- Status.
+
+Statuses:
+- Draft.
+- Sent.
+- Accepted.
+- Rejected.
+- Expired.
+- Converted.
+
+Features:
+- Create quotation.
+- Edit quotation.
+- Add and remove products.
+- Apply discounts.
+- Calculate taxes.
+- Generate PDF.
+- Send by email.
+- Accept/reject through customer portal.
+- Convert accepted quotation into subscription.
+
+Prevent duplicate subscription creation during quotation conversion.
+
+Preserve historical prices and terms.
+
+---
+
+# 12. SUBSCRIPTION MANAGEMENT
+
+This is the central module of NEXORA.
+
+Subscription fields:
+- Subscription number.
+- Customer.
+- Plan.
+- Start date.
+- End date.
+- Next billing date.
+- Billing frequency.
+- Payment terms.
+- Products.
+- Variants.
+- Quantity.
+- Unit price.
+- Tax.
+- Discount.
+- Total recurring amount.
+- Status.
+
+Lifecycle:
+
+Draft → Quotation → Confirmed → Active → Closed
+
+Additional states:
+- Paused.
+- Renewal pending.
+- Cancellation requested.
+
+Features:
+- Create subscription.
+- Edit permitted details.
+- Confirm subscription.
+- Activate subscription.
+- Pause subscription.
+- Resume subscription.
+- Renew subscription.
+- Close subscription.
+- Request cancellation.
+- View subscription history.
+
+Enforce valid state transitions.
+
+Respect plan policies for pause, early closure, and renewal.
+
+Record all changes in the subscription timeline.
+
+---
+
+# 13. AUTOMATED RECURRING BILLING ENGINE
+
+Build a reliable recurring billing engine using scheduled backend jobs.
+
+Workflow:
+
+1. Identify eligible subscriptions.
+2. Check next billing date.
+3. Verify subscription status.
+4. Verify plan eligibility.
+5. Calculate product amounts.
+6. Apply eligible discounts.
+7. Calculate taxes.
+8. Generate invoice.
+9. Save invoice items and financial snapshots.
+10. Record billing execution.
+11. Advance the next billing date only after successful invoice creation.
+
+Support:
+- Daily billing.
+- Weekly billing.
+- Monthly billing.
+- Yearly billing.
+
+Critical requirements:
+- Prevent duplicate invoices.
+- Use database transactions.
+- Use unique constraints for subscription and billing period.
+- Make billing idempotent.
+- Prevent concurrent duplicate processing.
+- Record failed billing attempts.
+- Provide safe retry functionality.
+- Do not silently skip billing periods.
+- Never advance next billing date after a failed invoice creation.
+
+Create a billing administration page showing:
+- Last billing run.
+- Next scheduled run.
+- Successful invoices.
+- Failed invoices.
+- Skipped subscriptions and reasons.
+- Retry actions.
+- Billing execution history.
+
+---
+
+# 14. INVOICE MANAGEMENT
+
+Invoice fields:
+- Invoice number.
+- Customer.
+- Subscription.
+- Invoice date.
+- Due date.
+- Billing period.
+- Product lines.
+- Quantity.
+- Unit price.
+- Tax.
+- Discount.
+- Subtotal.
+- Total.
+- Amount paid.
+- Outstanding amount.
+- Notes.
+
+Statuses:
+- Draft.
+- Confirmed.
+- Partially Paid.
+- Paid.
+- Cancelled.
+
+Overdue status should be derived from due date and outstanding balance.
+
+Features:
+- Create invoice.
+- Confirm invoice.
+- Cancel invoice with authorization and reason.
+- Send invoice by email.
+- Generate PDF.
+- Print invoice.
+- View invoice history.
+- Record payments.
+- View outstanding balance.
+
+Preserve historical product, price, tax, and discount snapshots.
+
+---
+
+# 15. TAX MANAGEMENT
+
+Tax fields:
+- Tax name.
+- Tax percentage.
+- Tax type.
+- Applicable products.
+- Effective start date.
+- Effective end date.
+- Status.
+
+Features:
+- Create tax rules.
+- Edit tax rules.
+- Assign taxes to products.
+- Apply taxes automatically.
+- Support multiple tax components where configured.
+- Preserve tax details on issued invoices.
+
+Use a consistent decimal rounding policy.
+
+---
+
+# 16. DISCOUNT MANAGEMENT
+
+Discount fields:
+- Discount name.
+- Discount code.
+- Discount type.
+- Fixed amount or percentage.
+- Minimum purchase amount.
+- Minimum quantity.
+- Start date.
+- Expiry date.
+- Total usage limit.
+- Per-customer usage limit.
+- Applicable products.
+- Applicable plans.
+- Status.
+
+Features:
+- Create discounts.
+- Apply discounts automatically where eligible.
+- Apply discount codes.
+- Restrict discount scope.
+- Track discount usage.
+- Stop applying expired discounts.
+- Stop applying discounts after usage limits.
+- Prevent duplicate usage recording.
+
+All discount eligibility and calculation logic must run on the backend.
+
+---
+
+# 17. PAYMENT MANAGEMENT
+
+Payment fields:
+- Payment number.
+- Customer.
+- Invoice.
+- Payment date.
+- Payment method.
+- Amount.
+- Transaction reference.
+- Notes.
+- Payment status.
+
+Methods:
+- Cash.
+- Bank transfer.
+- UPI.
+- Card.
+- Other configurable methods.
+
+Features:
+- Record payments.
+- Support partial payments.
+- Allocate payments to invoices.
+- Show paid amount.
+- Show outstanding amount.
+- Show overdue amount.
+- View payment history.
+- Reverse payments with appropriate authorization and audit history.
+
+Prevent:
+- Over-allocation.
+- Duplicate payment references where uniqueness is required.
+- Allocation exceeding available payment amount.
+- Allocation exceeding invoice outstanding balance.
+
+Use transactions for payment allocation.
+
+Mark invoices as paid only when their outstanding balance is zero under the defined rounding policy.
+
+---
+
+# 18. UNIQUE FEATURE: REVENUE GUARD
+
+Build a dedicated revenue leakage detection module.
+
+Detect:
+- Active subscriptions without expected invoices.
+- Missed renewal billing.
+- Duplicate invoices.
+- Incorrect invoice totals.
+- Expired discounts applied.
+- Unallocated payments.
+- Overdue invoices.
+- Unexpected subscription-to-invoice amount differences.
+- Failed billing jobs.
+- Upcoming renewals without successful billing events.
+
+Each alert must show:
+- Alert ID.
+- Issue category.
+- Customer.
+- Subscription.
+- Related invoice.
+- Estimated financial impact.
+- Severity.
+- Detection time.
+- Description.
+- Recommended action.
+- Resolution status.
+
+Severity:
+- Critical.
+- High.
+- Medium.
+- Low.
+
+Authorized staff can:
+- Investigate.
+- Review.
+- Assign an owner.
+- Add notes.
+- Resolve alerts.
+
+Never automatically modify financial records to resolve an alert.
+
+Create an overview of detected issues and estimated financial exposure.
+
+---
+
+# 19. UNIQUE FEATURE: SUBSCRIPTION HEALTH SCORE
+
+Create an explainable subscription health scoring engine.
+
+Score: 0–100.
+
+Consider:
+- Payment reliability.
+- Overdue invoices.
+- Failed payments.
+- Reversed payments.
+- Renewal proximity.
+- Cancellation requests.
+- Subscription status.
+- Payment delays.
+
+Categories:
+- 80–100: Healthy.
+- 50–79: At Risk.
+- 0–49: Critical.
+
+Display:
+- Score.
+- Category.
+- Contributing factors.
+- Recommended actions.
+- Score history.
+- Calculation timestamp.
+
+Allow admins to configure scoring weights.
+
+Use transparent rule-based calculations. Do not claim predictive AI functionality.
+
+---
+
+# 20. UNIQUE FEATURE: SMART RENEWAL AND DUNNING ENGINE
+
+Implement configurable renewal reminders.
+
+Default schedule:
+- 7 days before renewal.
+- 3 days before renewal.
+- On renewal date.
+- 3 days overdue.
+- 7 days overdue.
+- 15 days overdue.
+
+Features:
+- Email reminders.
+- Upcoming renewal notifications.
+- Payment overdue notifications.
+- Configurable intervals.
+- Grace periods.
+- Escalation rules.
+- Notification history.
+- Retry logs.
+
+Prevent duplicate notifications.
+
+Stop reminders after payment or when the relevant subscription is no longer eligible.
+
+---
+
+# 21. UNIQUE FEATURE: SUBSCRIPTION CHANGE SIMULATOR
+
+Allow users with permission to preview changes before applying them.
+
+Support:
+- Plan upgrade.
+- Plan downgrade.
+- Quantity change.
+- Add-on addition.
+- Add-on removal.
+- Billing frequency change.
+
+Display:
+
+| Metric | Current | Proposed |
+|---|---|---|
+| Plan | Existing | New |
+| Quantity | Existing | New |
+| Recurring amount | Existing | New |
+| Tax | Existing | New |
+| Discount | Existing | New |
+| Next billing date | Existing | Proposed |
+
+Also calculate:
+- Price difference.
+- Prorated charge.
+- Prorated credit.
+- Next invoice amount.
+
+Use a documented proration policy.
+
+Require explicit confirmation before applying changes.
+
+---
+
+# 22. UNIQUE FEATURE: PAYMENT RECONCILIATION ASSISTANT
+
+Allow staff to import bank transaction CSV files.
+
+Match using:
+- Transaction reference.
+- Amount.
+- Customer.
+- Transaction date.
+- Invoice number.
+
+Categories:
+- Exact match.
+- Possible match.
+- Unmatched.
+- Duplicate.
+- Manual review required.
+
+Features:
+- Upload CSV.
+- Validate CSV structure.
+- Preview records.
+- Match suggestions.
+- Manual matching.
+- Staff approval.
+- Import history.
+- Reconciliation history.
+
+Never automatically allocate ambiguous transactions.
+
+Preserve imported transaction records.
+
+---
+
+# 23. UNIQUE FEATURE: WHAT-IF REVENUE SIMULATOR
+
+Allow admins to model hypothetical scenarios.
+
+Scenarios:
+- Price increase.
+- Price reduction.
+- New customer acquisition.
+- Subscription cancellation.
+- Discount campaign.
+- Plan migration.
+- Renewal rate change.
+
+Display estimated:
+- MRR.
+- ARR.
+- Subscription count.
+- Revenue change.
+- Expected collections.
+
+Allow:
+- Create scenarios.
+- Edit scenarios.
+- Save scenarios.
+- Compare scenarios.
+- Display charts.
+- Export reports.
+
+Clearly distinguish actual financial results from hypothetical projections.
+
+Never present projections as guaranteed income.
+
+---
+
+# 24. UNIQUE FEATURE: SUBSCRIPTION TIMELINE AND AUDIT TRAIL
+
+Create a chronological history for every subscription.
+
+Track:
+- Creation.
+- Quotation.
+- Acceptance.
+- Confirmation.
+- Activation.
+- Plan changes.
+- Quantity changes.
+- Pause.
+- Resume.
+- Renewal.
+- Invoice generation.
+- Payment allocation.
+- Cancellation.
+- Closure.
+
+Each event must include:
+- Event type.
+- Timestamp.
+- Actor.
+- Previous value.
+- New value.
+- Description.
+- Related record.
+- Source of action.
+
+Audit logs must not be editable or deletable through normal application interfaces.
+
+---
+
+# 25. UNIQUE FEATURE: SUBSCRIPTION PORTFOLIO INTELLIGENCE
+
+Build a business intelligence dashboard.
+
+Metrics:
+- MRR.
+- ARR.
+- Revenue collected.
+- Outstanding revenue.
+- Subscription growth.
+- Customer growth.
+- Customer churn.
+- Subscription churn.
+- Revenue churn.
+- Renewal success rate.
+- Average Revenue Per Customer.
+- Plan performance.
+- Revenue concentration.
+- Monthly cohort analysis.
+- Estimated Customer Lifetime Value.
+
+Show calculation definitions and reporting periods.
+
+Keep separate:
+- Cash collected.
+- Invoiced revenue.
+- Outstanding receivables.
+- Projected recurring revenue.
+
+Never mix these metrics.
+
+---
+
+# 26. NOTIFICATIONS AND EMAIL
+
+Use Nodemailer for email notifications.
+
+Send emails for:
+- Welcome.
+- Password reset.
+- Quotation sent.
+- Quotation accepted/rejected.
+- Subscription activation.
+- Subscription renewal.
+- Invoice generated.
+- Invoice due.
+- Payment received.
+- Payment overdue.
+- Subscription paused.
+- Subscription resumed.
+- Cancellation confirmation.
+
+Maintain an email log:
+- Recipient.
+- Subject.
+- Notification type.
+- Related record.
+- Sent timestamp.
+- Delivery status.
+- Error details.
+
+Use reusable templates.
+
+Prevent duplicate event notifications.
+
+Provide a local email preview/testing option for development.
+
+---
+
+# 27. REPORTING AND EXPORTS
+
+Provide CSV and PDF exports where appropriate.
+
+Reports:
+- Customer report.
+- Subscription report.
+- Invoice report.
+- Payment report.
+- Outstanding payment report.
+- Overdue invoice report.
+- Revenue report.
+- Discount usage report.
+- Renewal report.
+- Revenue Guard report.
+- Subscription health report.
+- Reconciliation report.
+
+Filters:
+- Date range.
+- Customer.
+- Subscription status.
+- Invoice status.
+- Payment method.
+- Product.
+- Plan.
+
+Apply role permissions to exported data.
+
+---
+
+# 28. MYSQL DATABASE DESIGN
+
+Create a normalized relational database using Prisma migrations.
+
+Create the following tables:
+
+1. users
+2. customers
+3. password_reset_tokens
+4. audit_logs
+5. products
+6. product_variants
+7. plans
+8. plan_products
+9. quotation_templates
+10. quotation_template_items
+11. quotations
+12. quotation_items
+13. subscriptions
+14. subscription_items
+15. subscription_events
+16. subscription_requests
+17. tax_rules
+18. tax_rule_products
+19. discounts
+20. discount_products
+21. discount_usages
+22. invoices
+23. invoice_items
+24. billing_runs
+25. billing_run_items
+26. payments
+27. payment_allocations
+28. revenue_guard_alerts
+29. subscription_health_scores
+30. renewal_reminders
+31. subscription_change_previews
+32. bank_imports
+33. bank_transactions
+34. reconciliation_matches
+35. revenue_scenarios
+36. revenue_scenario_assumptions
+37. email_logs
+38. system_settings
+
+## Database standards
+
+- Use primary keys consistently.
+- Use foreign keys.
+- Use unique constraints.
+- Use DECIMAL(12,2) for monetary amounts.
+- Never use FLOAT or DOUBLE for financial calculations.
+- Use appropriate DATETIME/TIMESTAMP fields.
+- Add indexes for common search and filter fields.
+- Preserve financial history.
+- Use soft deletion or archival where appropriate.
+- Use database transactions for financial operations.
+- Store historical invoice snapshots.
+- Prevent duplicate billing periods with unique constraints.
+- Apply a consistent timezone policy.
+- Create database migrations.
+- Document the purpose and relationships of every table.
+
+Use appropriate database constraints and application-level checks together.
+
+---
+
+# 29. REAL-TIME AND DYNAMIC DATA REQUIREMENTS
+
+This is a mandatory requirement.
+
+- Connect all major frontend modules to actual backend APIs.
+- Retrieve application records from MySQL.
+- Calculate dashboard statistics from database data.
+- Update UI after successful create, update, payment, subscription, and invoice operations.
+- Use controlled polling or automatic refresh for important information.
+- Use WebSockets or Server-Sent Events only where real-time updates genuinely add value.
+- Avoid hardcoded JSON as a permanent data source.
+- Static JSON is allowed only for initial prototyping, development fixtures, and seed data.
+- Clearly label demonstration records.
+- Keep actual financial figures separate from projections.
+
+The application must retain its records after restarting the frontend or backend.
+
+---
+
+# 30. ROBUST INPUT VALIDATION AND ERROR HANDLING
+
+Implement validation at three levels:
+
+1. Frontend.
+2. Backend.
+3. Database.
+
+Validate:
+- Email.
+- Password.
+- Required fields.
+- Monetary values.
+- Quantities.
+- Dates.
+- Billing frequencies.
+- Subscription transitions.
+- Tax percentages.
+- Discount limits.
+- Payment amounts.
+- CSV imports.
+- File formats and sizes.
+
+Example messages:
+
+| Situation | Error message |
+|---|---|
+| Invalid email | Enter a valid email address. |
+| Duplicate email | An account with this email already exists. |
+| Weak password | Password must meet the required complexity rules. |
+| Password mismatch | Passwords do not match. |
+| Negative price | Price cannot be negative. |
+| Invalid quantity | Quantity must be greater than zero. |
+| Invalid date | End date must be later than start date. |
+| Expired discount | This discount has expired. |
+| Usage limit reached | This discount has reached its usage limit. |
+| Unauthorized access | You do not have permission to perform this action. |
+| Missing record | The requested record could not be found. |
+| Duplicate invoice | An invoice already exists for this billing period. |
+| Over-allocation | The allocation exceeds the available amount. |
+| Invalid transition | This action is not allowed for the current status. |
+| Billing failure | Invoice generation failed. No billing date was advanced. |
+
+## Standard API responses
+
+Success:
+
+{
+  "success": true,
+  "message": "Invoice created successfully.",
+  "data": {}
+}
+
+Failure:
+
+{
+  "success": false,
+  "message": "Please correct the highlighted fields.",
+  "errors": {
+    "email": "Enter a valid email address."
+  },
+  "code": "VALIDATION_ERROR"
+}
+
+HTTP codes:
+- 200: Success.
+- 201: Created.
+- 400: Invalid request.
+- 401: Authentication required.
+- 403: Permission denied.
+- 404: Not found.
+- 409: Conflict.
+- 422: Validation error.
+- 429: Rate limit exceeded.
+- 500: Internal server error.
+
+Implement:
+- Centralized error middleware.
+- Field-specific errors.
+- Database constraint handling.
+- Authentication errors.
+- Authorization errors.
+- API timeout handling.
+- Safe retry options.
+- Loading states.
+- Empty states.
+- Error states.
+
+Never expose raw database errors or stack traces to users.
+
+Never trust frontend financial calculations.
+
+---
+
+# 31. NAVIGATION AND INFORMATION ARCHITECTURE
+
+Use a clear, role-based sidebar.
+
+**Overview**
+- Dashboard.
+
+**Business Management**
+- Customers.
+- Products.
+- Plans.
+- Quotations.
+- Subscriptions.
+
+**Financial Operations**
+- Invoices.
+- Payments.
+- Reconciliation.
+- Tax Management.
+- Discounts.
+
+**Revenue Intelligence**
+- Revenue Guard.
+- Subscription Health.
+- Renewal Center.
+- Revenue Simulator.
+- Analytics and Reports.
+
+**Administration**
+- Staff Management.
+- Audit Logs.
+- Notifications.
+- Settings.
+
+Customers must see a simplified portal with only their own records.
+
+Provide:
+- Breadcrumbs.
+- Clear page titles.
+- Consistent action placement.
+- Search and filters.
+- Logical menu grouping.
+- Consistent back navigation.
+
+Do not overcrowd the sidebar.
+
+---
+
+# 32. GIT AND TEAM COLLABORATION
+
+Use Git properly throughout development.
+
+One team member must not be the only person managing the repository.
+
+Requirements:
+- Create a shared Git repository.
+- Give each team member individual Git access.
+- Assign modules to individual members.
+- Use feature branches.
+- Commit regularly.
+- Use descriptive commit messages.
+- Push changes frequently.
+- Create pull requests.
+- Review code before merging.
+- Test before merging.
+- Resolve merge conflicts carefully.
+- Maintain a stable main branch.
+- Maintain a develop branch.
+- Use releases or tags for major versions.
+- Document contribution instructions.
+
+Suggested branches:
+
+- main
+- develop
+- feature/authentication
+- feature/customer-management
+- feature/subscription-engine
+- feature/billing
+- feature/revenue-guard
+- feature/analytics
+- feature/ui-improvements
+
+Each team member must contribute through their own commits and pull requests.
+
+Maintain a contribution record showing:
+- Team member.
+- Assigned module.
+- Branch.
+- Commits.
+- Pull requests.
+- Completed work.
+
+Never commit `.env` files, passwords, API keys, or database credentials.
+
+---
+
+# 33. BACKEND API DESIGN
+
+Use RESTful API conventions.
+
+Create modular APIs for:
+
+- Authentication.
+- Users.
+- Customers.
+- Products.
+- Variants.
+- Plans.
+- Quotations.
+- Subscriptions.
+- Invoices.
+- Billing.
+- Taxes.
+- Discounts.
+- Payments.
+- Revenue Guard.
+- Subscription Health.
+- Renewals.
+- Reconciliation.
+- Revenue Simulation.
+- Reports.
+- Audit Logs.
+- Settings.
+
+Requirements:
+- Use proper HTTP methods.
+- Use consistent response structures.
+- Validate request bodies and parameters.
+- Enforce role permissions.
+- Handle pagination.
+- Support filtering and sorting.
+- Use database transactions where needed.
+- Document important endpoints.
+- Provide an OpenAPI/Swagger specification.
+
+---
+
+# 34. OFFLINE AND LOCAL-FIRST DEVELOPMENT
+
+Do not make NEXORA entirely dependent on cloud services.
+
+Requirements:
+- MySQL must run locally.
+- Frontend must run locally.
+- Backend must run locally.
+- Database migrations must work locally.
+- Seed data must be available.
+- Core subscription, invoice, payment, and reporting functions must work without cloud database dependencies.
+- Do not make core functionality depend on external AI APIs.
+- Handle temporary internet failures gracefully.
+- Preserve locally stored database records during internet outages.
+
+For external services:
+- Provide local email preview/testing.
+- Document external service requirements.
+- Provide clear fallback behavior where practical.
+
+Do not claim complete offline support unless it has been implemented and tested.
+
+---
+
+# 35. TECHNOLOGY SELECTION AND CODE QUALITY
+
+Use technology only when it adds actual value.
+
+Requirements:
+- Avoid unnecessary frameworks.
+- Avoid excessive dependencies.
+- Review packages before installation.
+- Prefer maintainable and understandable code.
+- Use reusable components.
+- Keep business logic separate from UI code.
+- Understand and adapt generated code snippets.
+- Never blindly copy and paste code.
+- Explain complex calculations and business rules in documentation.
+- Avoid adding AI features merely for presentation.
+
+Every team member must understand their implemented module and be able to explain:
+- Database structure.
+- API workflow.
+- Business logic.
+- Validation.
+- Error handling.
+- Security.
+- Testing.
+
+---
+
+# 36. PERFORMANCE AND SCALABILITY
+
+Support thousands of customers, subscriptions, invoices, and payments.
+
+Requirements:
+- Database indexes.
+- Server-side pagination.
+- Server-side filtering.
+- Server-side sorting.
+- Optimized queries.
+- Avoid N+1 queries.
+- Efficient dashboard aggregation.
+- Background jobs.
+- Avoid loading all records into the browser.
+- Use transactions for financial operations.
+
+Target page response time below two seconds under a documented, reasonable test environment and representative dataset.
+
+Do not claim performance targets have been achieved without testing.
+
+---
+
+# 37. SECURITY
+
+Implement:
+- bcrypt password hashing.
+- JWT authentication.
+- Role-based access control.
+- Customer ownership checks.
+- Input validation.
+- SQL injection prevention through Prisma.
+- Rate limiting.
+- Secure password reset.
+- Secure HTTP headers.
+- CORS configuration.
+- Environment variables.
+- Audit logging.
+- Protection against unauthorized record access.
+
+Never hardcode credentials.
+
+Provide `.env.example`.
+
+---
+
+# 38. PROJECT FOLDER STRUCTURE
+
+Use a clean, modular structure.
+
+## Frontend
+
+src/
+- assets/
+- components/
+- layouts/
+- pages/
+  - auth/
+  - dashboard/
+  - customers/
+  - products/
+  - plans/
+  - quotations/
+  - subscriptions/
+  - invoices/
+  - payments/
+  - revenue-guard/
+  - health-monitor/
+  - renewal-center/
+  - reconciliation/
+  - revenue-simulator/
+  - reports/
+  - settings/
+- hooks/
+- services/
+- context/
+- utils/
+- validations/
+- routes/
+
+## Backend
+
+server/
+- config/
+- controllers/
+- middleware/
+- routes/
+- services/
+- validators/
+- jobs/
+- utils/
+- templates/
+- prisma/
+  - schema.prisma
+  - migrations/
+  - seed.js
+- app.js
+- server.js
+
+Keep frontend and backend responsibilities separate.
+
+---
+
+# 39. SEED DATA AND DEMONSTRATION
+
+Create realistic demonstration data.
+
+Include:
+- 1 admin.
+- 2 staff members.
+- At least 10 customers.
+- 5 products.
+- Multiple product variants.
+- 5 subscription plans.
+- Active subscriptions.
+- Paused subscriptions.
+- Closed subscriptions.
+- Draft quotations.
+- Accepted quotations.
+- Draft invoices.
+- Confirmed invoices.
+- Partially paid invoices.
+- Paid invoices.
+- Overdue invoices.
+- Full and partial payments.
+- Active and expired discounts.
+- Different tax rules.
+- Revenue Guard alerts.
+- Different subscription health scores.
+- Upcoming renewal reminders.
+- Bank reconciliation transactions.
+- Saved what-if scenarios.
+
+Use clearly labelled demo credentials.
+
+Never use real customer data.
+
+Seed data must be inserted into MySQL, not used as a substitute for backend functionality.
+
+---
+
+# 40. TESTING REQUIREMENTS
+
+Test every important workflow.
+
+## Authentication
+- Valid registration.
+- Duplicate email.
+- Invalid password.
+- Invalid login.
+- Password reset.
+- Unauthorized access.
+
+## Products and plans
+- Create product.
+- Add variant.
+- Invalid price.
+- Create plan.
+- Invalid frequency.
+
+## Subscriptions
+- Create subscription.
+- Activate.
+- Pause.
+- Resume.
+- Renew.
+- Close.
+- Invalid state transition.
+
+## Billing
+- Daily billing.
+- Weekly billing.
+- Monthly billing.
+- Yearly billing.
+- Duplicate prevention.
+- Failed billing retry.
+- Concurrent billing protection.
+- Month-end calculations.
+- Leap-year calculations.
+
+## Payments
+- Full payment.
+- Partial payment.
+- Multiple allocations.
+- Overpayment prevention.
+- Reversal.
+
+## Unique features
+- Revenue Guard detection.
+- Health score calculation.
+- Reminder duplication prevention.
+- Subscription change preview.
+- CSV validation.
+- Reconciliation matching.
+- Revenue scenario calculations.
+
+Test backend APIs and frontend workflows.
+
+---
+
+# 41. IMPLEMENTATION ROADMAP
+
+Build the project in the following phases.
+
+**Phase 1:** Project initialization and MySQL connection.
+
+**Phase 2:** Prisma schema, migrations, and database relationships.
+
+**Phase 3:** Authentication and role-based authorization.
+
+**Phase 4:** Customer management.
+
+**Phase 5:** Product, variant, and plan management.
+
+**Phase 6:** Quotation management.
+
+**Phase 7:** Subscription management and lifecycle.
+
+**Phase 8:** Tax and discount engines.
+
+**Phase 9:** Recurring billing engine.
+
+**Phase 10:** Invoice and payment management.
+
+**Phase 11:** Revenue Guard.
+
+**Phase 12:** Subscription Health Score.
+
+**Phase 13:** Renewal and dunning engine.
+
+**Phase 14:** Subscription Change Simulator.
+
+**Phase 15:** Payment Reconciliation Assistant.
+
+**Phase 16:** What-if Revenue Simulator.
+
+**Phase 17:** Subscription Timeline and Audit Trail.
+
+**Phase 18:** Portfolio Intelligence and reports.
+
+**Phase 19:** Responsive UI refinement.
+
+**Phase 20:** Testing, security, performance, and deployment documentation.
+
+Maintain a development checklist with completed, in-progress, and pending tasks.
+
+Do not skip important functionality to make the project appear complete.
+
+---
+
+# 42. FINAL ACCEPTANCE CRITERIA
+
+NEXORA is complete only when:
+
+1. Admin can securely log in.
+2. Admin can create and manage staff.
+3. Staff can manage permitted records.
+4. Customers can access only their own portal.
+5. Products and variants can be created.
+6. Subscription plans can be configured.
+7. Quotations can be created, sent, and accepted.
+8. Quotations can be converted into subscriptions.
+9. Subscription lifecycle transitions work.
+10. Recurring invoices are generated automatically.
+11. Duplicate invoices are prevented.
+12. Failed billing jobs can be retried safely.
+13. Taxes calculate correctly.
+14. Discounts apply according to their conditions.
+15. Full and partial payments work.
+16. Invoice balances update correctly.
+17. Revenue Guard identifies billing inconsistencies.
+18. Subscription health scores are explainable.
+19. Renewal reminders work without duplication.
+20. Subscription changes can be simulated.
+21. Bank CSV transactions can be imported.
+22. Payment reconciliation works with manual approval.
+23. Revenue scenarios can be created and compared.
+24. Subscription timelines are available.
+25. Audit logs are maintained.
+26. Reports can be exported.
+27. Dashboards use actual database records.
+28. Dynamic data updates correctly.
+29. Forms provide meaningful validation errors.
+30. Responsive layouts work on mobile and desktop.
+31. Git contributions are distributed across team members.
+32. Local setup works without a cloud database.
+33. Financial calculations are tested.
+34. Core workflows survive application restarts.
+35. Setup and usage are documented.
+
+---
+
+# 43. FINAL DEVELOPMENT INSTRUCTIONS
+
+Follow these rules strictly:
+
+1. Build a complete application, not just a static UI.
+2. Use real backend APIs and MySQL for persistent business data.
+3. Do not use hardcoded JSON as the permanent data source.
+4. Do not use localStorage as a replacement for MySQL.
+5. Do not create non-functional buttons.
+6. Do not bypass backend validation.
+7. Do not calculate final financial amounts exclusively in React.
+8. Do not expose raw database errors.
+9. Do not delete financial history.
+10. Do not generate duplicate invoices or notifications.
+11. Do not claim features are complete before testing.
+12. Keep the application responsive and visually consistent.
+13. Use Git properly across all team members.
+14. Provide local setup instructions for Windows.
+15. Document all external service dependencies.
+16. Keep the application understandable and maintainable.
+17. Prioritize correctness of financial operations over decorative UI.
+18. Do not introduce unnecessary technologies.
+19. Do not make core features dependent on external AI services.
+20. Maintain the same database architecture across all implementation phases.
+
+## REQUIRED DELIVERABLES
+
+Deliver:
+
+- Complete React frontend.
+- Complete Express backend.
+- MySQL database schema.
+- Prisma migrations.
+- Seed data.
+- Authentication and authorization.
+- Functional REST APIs.
+- Recurring billing engine.
+- All subscription management modules.
+- All eight revenue intelligence features.
+- PDF invoice and quotation generation.
+- Email notification system.
+- Responsive UI.
+- Input validation and error handling.
+- API documentation.
+- README.
+- `.env.example`.
+- Git contribution instructions.
+- Test cases.
+- Windows setup instructions.
+- Local execution instructions.
+
+## FINAL PROJECT GOAL
+
+Build **NEXORA – Subscription & Revenue Intelligence Platform** as a complete, reliable, database-driven business application.
+
+The platform must combine subscription management, automated recurring billing, customer management, financial operations, revenue leakage detection, subscription health monitoring, renewal automation, payment reconciliation, and revenue scenario analysis.
+
+The final result must demonstrate:
+
+- A real business problem being solved.
+- A practical and working solution.
+- Meaningful innovation beyond basic subscription management.
+- Strong backend and database engineering.
+- Dynamic data integration.
+- Professional and responsive UI.
+- Robust validation and security.
+- Proper Git-based team collaboration.
+- Local development capability.
+- A clear and convincing end-to-end demonstration.
+
+**Build a working product that can be demonstrated, tested, explained, and extended—not merely a visually attractive prototype.**

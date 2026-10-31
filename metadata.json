@@ -1,0 +1,6 @@
+{
+  "name": "NEXORA – Subscription & Revenue Intelligence Platform",
+  "description": "Enterprise subscription management and revenue intelligence platform with recurring billing, revenue leakage detection, subscription health scoring, payment reconciliation, and scenario simulation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,835 @@
+// Prisma Schema for NEXORA – Subscription & Revenue Intelligence Platform
+// Database: MySQL 8.0.16+ (InnoDB, utf8mb4)
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SubscriptionStatus {
+  DRAFT
+  QUOTATION
+  CONFIRMED
+  ACTIVE
+  PAUSED
+  RENEWAL_PENDING
+  CANCELLATION_REQUESTED
+  CLOSED
+}
+
+enum BillingFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  UPI
+  CARD
+  OTHER
+}
+
+enum PaymentStatus {
+  COMPLETED
+  REVERSED
+  PENDING
+}
+
+enum AlertSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum AlertStatus {
+  NEW
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum HealthCategory {
+  HEALTHY
+  AT_RISK
+  CRITICAL
+}
+
+// 1. Users
+model User {
+  id           String      @id @default(uuid())
+  name         String      @db.VarChar(191)
+  email        String      @unique @db.VarChar(191)
+  passwordHash String      @db.VarChar(255)
+  role         Role        @default(CUSTOMER)
+  customerId   String?     @db.VarChar(191)
+  phone        String?     @db.VarChar(50)
+  status       UserStatus  @default(ACTIVE)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  customer     Customer?   @relation(fields: [customerId], references: [id])
+  auditLogs    AuditLog[]
+  assignedCustomers Customer[] @relation("StaffAssignedCustomers")
+
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+// 2. Customers
+model Customer {
+  id              String      @id @default(uuid())
+  customerNumber  String      @unique @db.VarChar(50)
+  name            String      @db.VarChar(191)
+  email           String      @unique @db.VarChar(191)
+  phone           String?     @db.VarChar(50)
+  companyName     String?     @db.VarChar(191)
+  billingAddress  String?     @db.Text
+  taxId           String?     @db.VarChar(50)
+  country         String      @default("India") @db.VarChar(100)
+  state           String?     @db.VarChar(100)
+  city            String?     @db.VarChar(100)
+  postalCode      String?     @db.VarChar(20)
+  status          UserStatus  @default(ACTIVE)
+  assignedStaffId String?     @db.VarChar(191)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  assignedStaff   User?       @relation("StaffAssignedCustomers", fields: [assignedStaffId], references: [id])
+  users           User[]
+  subscriptions   Subscription[]
+  quotations      Quotation[]
+  invoices        Invoice[]
+  payments        Payment[]
+  healthScores    SubscriptionHealthScore[]
+  alerts          RevenueGuardAlert[]
+
+  @@index([status])
+  @@index([email])
+  @@map("customers")
+}
+
+// 3. Password Reset Tokens
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @db.VarChar(191)
+  token     String    @unique @db.VarChar(255)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@map("password_reset_tokens")
+}
+
+// 4. Audit Logs
+model AuditLog {
+  id            String    @id @default(uuid())
+  eventType     String    @db.VarChar(100)
+  actorId       String?   @db.VarChar(191)
+  actorName     String    @db.VarChar(191)
+  actorRole     String    @db.VarChar(50)
+  action        String    @db.VarChar(100)
+  entityType    String    @db.VarChar(100)
+  entityId      String    @db.VarChar(191)
+  previousValue String?   @db.LongText
+  newValue      String?   @db.LongText
+  description   String    @db.Text
+  ipAddress     String?   @db.VarChar(50)
+  createdAt     DateTime  @default(now())
+
+  actor         User?     @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// 5. Products
+model Product {
+  id            String            @id @default(uuid())
+  name          String            @db.VarChar(191)
+  type          String            @default("software") @db.VarChar(50)
+  salesPrice    Decimal           @db.Decimal(12, 2)
+  costPrice     Decimal           @default(0.00) @db.Decimal(12, 2)
+  description   String?           @db.Text
+  internalNotes String?           @db.Text
+  status        UserStatus        @default(ACTIVE)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  variants      ProductVariant[]
+  planProducts  PlanProduct[]
+  taxRules      TaxRuleProduct[]
+  discountRules DiscountProduct[]
+  invoiceItems  InvoiceItem[]
+  quotationItems QuotationItem[]
+
+  @@map("products")
+}
+
+// 6. Product Variants
+model ProductVariant {
+  id              String      @id @default(uuid())
+  productId       String      @db.VarChar(191)
+  name            String      @db.VarChar(100)
+  additionalPrice Decimal     @default(0.00) @db.Decimal(12, 2)
+  isDefault       Boolean     @default(false)
+  status          UserStatus  @default(ACTIVE)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  invoiceItems    InvoiceItem[]
+  quotationItems  QuotationItem[]
+
+  @@map("product_variants")
+}
+
+// 7. Plans
+model Plan {
+  id                String            @id @default(uuid())
+  name              String            @db.VarChar(191)
+  code              String            @unique @db.VarChar(50)
+  description       String?           @db.Text
+  billingPrice      Decimal           @db.Decimal(12, 2)
+  billingFrequency  BillingFrequency  @default(MONTHLY)
+  minimumQuantity   Int               @default(1)
+  availableFrom     DateTime?
+  availableUntil    DateTime?
+  allowAutoClosure  Boolean           @default(true)
+  allowEarlyClosure Boolean           @default(true)
+  allowPause        Boolean           @default(true)
+  allowRenewal      Boolean           @default(true)
+  allowUpgrade      Boolean           @default(true)
+  allowDowngrade    Boolean           @default(true)
+  status            UserStatus        @default(ACTIVE)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  planProducts      PlanProduct[]
+  subscriptions     Subscription[]
+  quotations        Quotation[]
+  discountProducts  DiscountProduct[]
+
+  @@map("plans")
+}
+
+// 8. Plan Products
+model PlanProduct {
+  id              String    @id @default(uuid())
+  planId          String    @db.VarChar(191)
+  productId       String    @db.VarChar(191)
+  isMandatory     Boolean   @default(true)
+  defaultQuantity Int       @default(1)
+
+  plan            Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, productId])
+  @@map("plan_products")
+}
+
+// 9. Quotation Templates
+model QuotationTemplate {
+  id                  String                    @id @default(uuid())
+  name                String                    @db.VarChar(191)
+  description         String?                   @db.Text
+  defaultPaymentTerms String                    @default("Net 30") @db.VarChar(50)
+  notes               String?                   @db.Text
+  createdAt           DateTime                  @default(now())
+  items               QuotationTemplateItem[]
+
+  @@map("quotation_templates")
+}
+
+// 10. Quotation Template Items
+model QuotationTemplateItem {
+  id          String            @id @default(uuid())
+  templateId  String            @db.VarChar(191)
+  productId   String            @db.VarChar(191)
+  variantId   String?           @db.VarChar(191)
+  quantity    Int               @default(1)
+  unitPrice   Decimal           @db.Decimal(12, 2)
+
+  template    QuotationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@map("quotation_template_items")
+}
+
+// 11. Quotations
+model Quotation {
+  id                      String            @id @default(uuid())
+  quotationNumber         String            @unique @db.VarChar(50)
+  customerId              String            @db.VarChar(191)
+  quotationDate           DateTime          @default(now())
+  expiryDate              DateTime
+  paymentTerms            String            @default("Net 30") @db.VarChar(50)
+  planId                  String?           @db.VarChar(191)
+  quantity                Int               @default(1)
+  subtotal                Decimal           @db.Decimal(12, 2)
+  discountAmount          Decimal           @default(0.00) @db.Decimal(12, 2)
+  discountId              String?           @db.VarChar(191)
+  taxAmount               Decimal           @default(0.00) @db.Decimal(12, 2)
+  totalAmount             Decimal           @db.Decimal(12, 2)
+  notes                   String?           @db.Text
+  status                  QuotationStatus   @default(DRAFT)
+  convertedSubscriptionId String?           @db.VarChar(191)
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  customer                Customer          @relation(fields: [customerId], references: [id])
+  plan                    Plan?             @relation(fields: [planId], references: [id])
+  items                   QuotationItem[]
+
+  @@index([status])
+  @@map("quotations")
+}
+
+// 12. Quotation Items
+model QuotationItem {
+  id            String          @id @default(uuid())
+  quotationId   String          @db.VarChar(191)
+  productId     String          @db.VarChar(191)
+  variantId     String?         @db.VarChar(191)
+  productName   String          @db.VarChar(191)
+  quantity      Int             @default(1)
+  unitPrice     Decimal         @db.Decimal(12, 2)
+  variantPrice  Decimal         @default(0.00) @db.Decimal(12, 2)
+  lineTotal     Decimal         @db.Decimal(12, 2)
+
+  quotation     Quotation       @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  product       Product         @relation(fields: [productId], references: [id])
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@map("quotation_items")
+}
+
+// 13. Subscriptions
+model Subscription {
+  id                    String              @id @default(uuid())
+  subscriptionNumber    String              @unique @db.VarChar(50)
+  customerId            String              @db.VarChar(191)
+  planId                String              @db.VarChar(191)
+  status                SubscriptionStatus  @default(DRAFT)
+  startDate             DateTime
+  endDate               DateTime?
+  nextBillingDate       DateTime
+  lastBillingDate       DateTime?
+  billingFrequency      BillingFrequency    @default(MONTHLY)
+  paymentTerms          String              @default("Net 30") @db.VarChar(50)
+  quantity              Int                 @default(1)
+  unitPrice             Decimal             @db.Decimal(12, 2)
+  taxRate               Decimal             @default(18.00) @db.Decimal(5, 2)
+  discountAmount        Decimal             @default(0.00) @db.Decimal(12, 2)
+  discountId            String?             @db.VarChar(191)
+  totalRecurringAmount  Decimal             @db.Decimal(12, 2)
+  pauseDate             DateTime?
+  resumeDate            DateTime?
+  cancellationReason    String?             @db.Text
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  customer              Customer            @relation(fields: [customerId], references: [id])
+  plan                  Plan                @relation(fields: [planId], references: [id])
+  items                 SubscriptionItem[]
+  events                SubscriptionEvent[]
+  invoices              Invoice[]
+  requests              SubscriptionRequest[]
+  healthScores          SubscriptionHealthScore[]
+  reminders             RenewalReminder[]
+  alerts                RevenueGuardAlert[]
+
+  @@index([status])
+  @@index([nextBillingDate])
+  @@map("subscriptions")
+}
+
+// 14. Subscription Items
+model SubscriptionItem {
+  id              String          @id @default(uuid())
+  subscriptionId  String          @db.VarChar(191)
+  productId       String          @db.VarChar(191)
+  variantId       String?         @db.VarChar(191)
+  productName     String          @db.VarChar(191)
+  quantity        Int             @default(1)
+  unitPrice       Decimal         @db.Decimal(12, 2)
+  variantPrice    Decimal         @default(0.00) @db.Decimal(12, 2)
+  lineTotal       Decimal         @db.Decimal(12, 2)
+
+  subscription    Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("subscription_items")
+}
+
+// 15. Subscription Events (Timeline)
+model SubscriptionEvent {
+  id              String        @id @default(uuid())
+  subscriptionId  String        @db.VarChar(191)
+  eventType       String        @db.VarChar(100)
+  actorId         String?       @db.VarChar(191)
+  actorName       String        @db.VarChar(191)
+  previousValue   String?       @db.Text
+  newValue        String?       @db.Text
+  description     String        @db.Text
+  timestamp       DateTime      @default(now())
+
+  subscription    Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, timestamp])
+  @@map("subscription_events")
+}
+
+// 16. Subscription Requests
+model SubscriptionRequest {
+  id                String        @id @default(uuid())
+  subscriptionId    String        @db.VarChar(191)
+  customerId        String        @db.VarChar(191)
+  requestType       String        @db.VarChar(50)
+  proposedPlanId    String?       @db.VarChar(191)
+  proposedQuantity  Int?
+  reason            String?       @db.Text
+  status            String        @default("pending") @db.VarChar(50)
+  reviewedBy        String?       @db.VarChar(191)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  subscription      Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("subscription_requests")
+}
+
+// 17. Tax Rules
+model TaxRule {
+  id                  String            @id @default(uuid())
+  name                String            @db.VarChar(100)
+  percentage          Decimal           @db.Decimal(5, 2)
+  type                String            @default("GST") @db.VarChar(50)
+  isDefault           Boolean           @default(false)
+  effectiveStartDate  DateTime          @default(now())
+  effectiveEndDate    DateTime?
+  status              UserStatus        @default(ACTIVE)
+  createdAt           DateTime          @default(now())
+
+  products            TaxRuleProduct[]
+
+  @@map("tax_rules")
+}
+
+// 18. Tax Rule Products
+model TaxRuleProduct {
+  id          String    @id @default(uuid())
+  taxRuleId   String    @db.VarChar(191)
+  productId   String    @db.VarChar(191)
+
+  taxRule     TaxRule   @relation(fields: [taxRuleId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([taxRuleId, productId])
+  @@map("tax_rule_products")
+}
+
+// 19. Discounts
+model Discount {
+  id                String            @id @default(uuid())
+  name              String            @db.VarChar(191)
+  code              String            @unique @db.VarChar(50)
+  type              String            @default("percentage") @db.VarChar(50)
+  value             Decimal           @db.Decimal(12, 2)
+  minPurchaseAmount Decimal           @default(0.00) @db.Decimal(12, 2)
+  minQuantity       Int               @default(1)
+  startDate         DateTime          @default(now())
+  expiryDate        DateTime?
+  totalUsageLimit   Int?
+  perCustomerLimit  Int?              @default(1)
+  usageCount        Int               @default(0)
+  status            UserStatus        @default(ACTIVE)
+  createdAt         DateTime          @default(now())
+
+  products          DiscountProduct[]
+  usages            DiscountUsage[]
+
+  @@map("discounts")
+}
+
+// 20. Discount Products
+model DiscountProduct {
+  id          String    @id @default(uuid())
+  discountId  String    @db.VarChar(191)
+  productId   String?   @db.VarChar(191)
+  planId      String?   @db.VarChar(191)
+
+  discount    Discount  @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  product     Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  plan        Plan?     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("discount_products")
+}
+
+// 21. Discount Usages
+model DiscountUsage {
+  id              String    @id @default(uuid())
+  discountId      String    @db.VarChar(191)
+  customerId      String    @db.VarChar(191)
+  invoiceId       String?   @db.VarChar(191)
+  subscriptionId  String?   @db.VarChar(191)
+  discountAmount  Decimal   @db.Decimal(12, 2)
+  usedAt          DateTime  @default(now())
+
+  discount        Discount  @relation(fields: [discountId], references: [id])
+
+  @@map("discount_usages")
+}
+
+// 22. Invoices
+model Invoice {
+  id                String              @id @default(uuid())
+  invoiceNumber     String              @unique @db.VarChar(50)
+  customerId        String              @db.VarChar(191)
+  subscriptionId    String?             @db.VarChar(191)
+  invoiceDate       DateTime            @default(now())
+  dueDate           DateTime
+  billingPeriod     String              @db.VarChar(50)
+  subtotal          Decimal             @db.Decimal(12, 2)
+  discountAmount    Decimal             @default(0.00) @db.Decimal(12, 2)
+  taxAmount         Decimal             @default(0.00) @db.Decimal(12, 2)
+  total             Decimal             @db.Decimal(12, 2)
+  amountPaid        Decimal             @default(0.00) @db.Decimal(12, 2)
+  outstandingAmount Decimal             @db.Decimal(12, 2)
+  status            InvoiceStatus       @default(CONFIRMED)
+  isOverdue         Boolean             @default(false)
+  notes             String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  customer          Customer            @relation(fields: [customerId], references: [id])
+  subscription      Subscription?       @relation(fields: [subscriptionId], references: [id])
+  items             InvoiceItem[]
+  allocations       PaymentAllocation[]
+  alerts            RevenueGuardAlert[]
+
+  // Critical requirement: Unique constraint for subscription and billing period to guarantee idempotency!
+  @@unique([subscriptionId, billingPeriod])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+// 23. Invoice Items
+model InvoiceItem {
+  id            String          @id @default(uuid())
+  invoiceId     String          @db.VarChar(191)
+  productId     String?         @db.VarChar(191)
+  variantId     String?         @db.VarChar(191)
+  description   String          @db.VarChar(255)
+  quantity      Int             @default(1)
+  unitPrice     Decimal         @db.Decimal(12, 2)
+  lineTotal     Decimal         @db.Decimal(12, 2)
+
+  invoice       Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product       Product?        @relation(fields: [productId], references: [id])
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@map("invoice_items")
+}
+
+// 24. Billing Runs
+model BillingRun {
+  id                        String            @id @default(uuid())
+  runNumber                 String            @unique @db.VarChar(50)
+  runDate                   DateTime          @default(now())
+  scheduledBy               String            @default("system_cron") @db.VarChar(100)
+  totalSubscriptionsScanned Int               @default(0)
+  successfulInvoicesCount   Int               @default(0)
+  failedInvoicesCount       Int               @default(0)
+  skippedCount              Int               @default(0)
+  status                    String            @default("completed") @db.VarChar(50)
+  logDetails                String?           @db.LongText
+  createdAt                 DateTime          @default(now())
+
+  items                     BillingRunItem[]
+
+  @@map("billing_runs")
+}
+
+// 25. Billing Run Items
+model BillingRunItem {
+  id              String      @id @default(uuid())
+  billingRunId    String      @db.VarChar(191)
+  subscriptionId  String      @db.VarChar(191)
+  invoiceId       String?     @db.VarChar(191)
+  status          String      @db.VarChar(50)
+  reason          String?     @db.Text
+  errorDetails    String?     @db.Text
+
+  billingRun      BillingRun  @relation(fields: [billingRunId], references: [id], onDelete: Cascade)
+
+  @@map("billing_run_items")
+}
+
+// 26. Payments
+model Payment {
+  id                    String              @id @default(uuid())
+  paymentNumber         String              @unique @db.VarChar(50)
+  customerId            String              @db.VarChar(191)
+  invoiceId             String?             @db.VarChar(191)
+  paymentDate           DateTime            @default(now())
+  paymentMethod         PaymentMethod       @default(BANK_TRANSFER)
+  amount                Decimal             @db.Decimal(12, 2)
+  allocatedAmount       Decimal             @default(0.00) @db.Decimal(12, 2)
+  transactionReference  String              @db.VarChar(100)
+  notes                 String?             @db.Text
+  status                PaymentStatus       @default(COMPLETED)
+  reversedAt            DateTime?
+  reversalReason        String?             @db.Text
+  createdAt             DateTime            @default(now())
+
+  customer              Customer            @relation(fields: [customerId], references: [id])
+  allocations           PaymentAllocation[]
+
+  @@index([transactionReference])
+  @@map("payments")
+}
+
+// 27. Payment Allocations
+model PaymentAllocation {
+  id              String    @id @default(uuid())
+  paymentId       String    @db.VarChar(191)
+  invoiceId       String    @db.VarChar(191)
+  amountAllocated Decimal   @db.Decimal(12, 2)
+  allocatedAt     DateTime  @default(now())
+
+  payment         Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice         Invoice   @relation(fields: [invoiceId], references: [id])
+
+  @@map("payment_allocations")
+}
+
+// 28. Revenue Guard Alerts
+model RevenueGuardAlert {
+  id                      String        @id @default(uuid())
+  alertCode               String        @unique @db.VarChar(50)
+  category                String        @db.VarChar(100)
+  customerId              String        @db.VarChar(191)
+  subscriptionId          String?       @db.VarChar(191)
+  invoiceId               String?       @db.VarChar(191)
+  estimatedImpact         Decimal       @default(0.00) @db.Decimal(12, 2)
+  severity                AlertSeverity @default(MEDIUM)
+  detectionTime           DateTime      @default(now())
+  description             String        @db.Text
+  recommendedAction       String        @db.Text
+  status                  AlertStatus   @default(NEW)
+  assignedStaffId         String?       @db.VarChar(191)
+  staffNotes              String?       @db.Text
+  resolvedAt              DateTime?
+
+  customer                Customer      @relation(fields: [customerId], references: [id])
+  subscription            Subscription? @relation(fields: [subscriptionId], references: [id])
+  invoice                 Invoice?      @relation(fields: [invoiceId], references: [id])
+
+  @@index([status])
+  @@index([severity])
+  @@map("revenue_guard_alerts")
+}
+
+// 29. Subscription Health Scores
+model SubscriptionHealthScore {
+  id              String          @id @default(uuid())
+  subscriptionId  String          @db.VarChar(191)
+  customerId      String          @db.VarChar(191)
+  score           Int
+  category        HealthCategory
+  factorsJson     String          @db.LongText
+  actionsJson     String          @db.LongText
+  calculatedAt    DateTime        @default(now())
+
+  subscription    Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  customer        Customer        @relation(fields: [customerId], references: [id])
+
+  @@map("subscription_health_scores")
+}
+
+// 30. Renewal Reminders
+model RenewalReminder {
+  id              String        @id @default(uuid())
+  subscriptionId  String        @db.VarChar(191)
+  customerId      String        @db.VarChar(191)
+  reminderType    String        @db.VarChar(50)
+  scheduledFor    DateTime
+  sentAt          DateTime?
+  status          String        @default("scheduled") @db.VarChar(50)
+  recipientEmail  String        @db.VarChar(191)
+
+  subscription    Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledFor, status])
+  @@map("renewal_reminders")
+}
+
+// 31. Subscription Change Previews
+model SubscriptionChangePreview {
+  id                  String    @id @default(uuid())
+  subscriptionId      String    @db.VarChar(191)
+  proposedPlanId      String    @db.VarChar(191)
+  proposedQuantity    Int
+  effectiveDate       DateTime
+  daysRemaining       Int
+  currentAmount       Decimal   @db.Decimal(12, 2)
+  proposedAmount      Decimal   @db.Decimal(12, 2)
+  proratedCredit      Decimal   @db.Decimal(12, 2)
+  proratedCharge      Decimal   @db.Decimal(12, 2)
+  netDifference       Decimal   @db.Decimal(12, 2)
+  nextInvoiceEstimate Decimal   @db.Decimal(12, 2)
+  createdAt           DateTime  @default(now())
+
+  @@map("subscription_change_previews")
+}
+
+// 32. Bank Imports
+model BankImport {
+  id            String            @id @default(uuid())
+  fileName      String            @db.VarChar(255)
+  uploadDate    DateTime          @default(now())
+  totalRows     Int               @default(0)
+  matchedRows   Int               @default(0)
+  unmatchedRows Int               @default(0)
+  status        String            @default("completed") @db.VarChar(50)
+  uploadedBy    String            @db.VarChar(191)
+
+  transactions  BankTransaction[]
+
+  @@map("bank_imports")
+}
+
+// 33. Bank Transactions
+model BankTransaction {
+  id                    String      @id @default(uuid())
+  importId              String      @db.VarChar(191)
+  transactionReference  String      @db.VarChar(100)
+  transactionDate       DateTime
+  description           String      @db.VarChar(255)
+  amount                Decimal     @db.Decimal(12, 2)
+  customerNameMatch     String?     @db.VarChar(191)
+  invoiceMatch          String?     @db.VarChar(50)
+  matchStatus           String      @default("unmatched") @db.VarChar(50)
+  matchedPaymentId      String?     @db.VarChar(191)
+  createdAt             DateTime    @default(now())
+
+  bankImport            BankImport  @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@index([transactionReference])
+  @@map("bank_transactions")
+}
+
+// 34. Reconciliation Matches
+model ReconciliationMatch {
+  id                String    @id @default(uuid())
+  bankTransactionId String    @db.VarChar(191)
+  paymentId         String?   @db.VarChar(191)
+  invoiceId         String?   @db.VarChar(191)
+  matchedBy         String    @db.VarChar(191)
+  matchedAt         DateTime  @default(now())
+  notes             String?   @db.Text
+  confidenceScore   Int       @default(100)
+
+  @@map("reconciliation_matches")
+}
+
+// 35. Revenue Scenarios
+model RevenueScenario {
+  id                String                      @id @default(uuid())
+  name              String                      @db.VarChar(191)
+  description       String?                     @db.Text
+  baselineMrr       Decimal                     @db.Decimal(12, 2)
+  simulatedMrr      Decimal                     @db.Decimal(12, 2)
+  baselineArr       Decimal                     @db.Decimal(12, 2)
+  simulatedArr      Decimal                     @db.Decimal(12, 2)
+  projectedGrowthPct Decimal                    @db.Decimal(5, 2)
+  notes             String?                     @db.Text
+  createdBy         String                      @db.VarChar(191)
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+
+  assumptions       RevenueScenarioAssumption[]
+
+  @@map("revenue_scenarios")
+}
+
+// 36. Revenue Scenario Assumptions
+model RevenueScenarioAssumption {
+  id                String          @id @default(uuid())
+  scenarioId        String          @db.VarChar(191)
+  parameterName     String          @db.VarChar(100)
+  parameterValue    String          @db.VarChar(100)
+  impactDescription String          @db.Text
+
+  scenario          RevenueScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@map("revenue_scenario_assumptions")
+}
+
+// 37. Email Logs
+model EmailLog {
+  id            String    @id @default(uuid())
+  recipient     String    @db.VarChar(191)
+  subject       String    @db.VarChar(255)
+  templateType  String    @db.VarChar(100)
+  relatedEntity String?   @db.VarChar(50)
+  relatedId     String?   @db.VarChar(191)
+  sentAt        DateTime  @default(now())
+  status        String    @default("delivered") @db.VarChar(50)
+  errorDetails  String?   @db.Text
+  emailBody     String    @db.LongText
+
+  @@index([recipient])
+  @@index([sentAt])
+  @@map("email_logs")
+}
+
+// 38. System Settings
+model SystemSetting {
+  id          String    @id @default(uuid())
+  key         String    @unique @db.VarChar(100)
+  value       String    @db.LongText
+  description String?   @db.Text
+  updatedAt   DateTime  @updatedAt
+
+  @@map("system_settings")
+}
