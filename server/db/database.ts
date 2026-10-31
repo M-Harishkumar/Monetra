@@ -694,6 +694,8 @@ function createSeedDatabase(): DatabaseSchema {
       status: 'EXPIRED',
       createdAt: now.toISOString(),
     },
+  ];
+
   // 7b. Quotation Templates (Scene: Sales rep starts from template with pre-configured plan and lines)
   const quotationTemplates = [
     {
