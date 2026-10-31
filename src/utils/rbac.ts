@@ -10,8 +10,8 @@ export interface RoutePermission {
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/', allowedRoles: ['ADMIN', 'STAFF', 'CUSTOMER'], label: 'Dashboard Router', category: 'OVERVIEW' },
   { path: '/admin/dashboard', allowedRoles: ['ADMIN'], label: 'Admin Dashboard', category: 'OVERVIEW' },
-  { path: '/staff/dashboard', allowedRoles: ['ADMIN', 'STAFF'], label: 'Staff Dashboard', category: 'OVERVIEW' },
-  { path: '/customer/dashboard', allowedRoles: ['ADMIN', 'CUSTOMER'], label: 'Customer Portal', category: 'OVERVIEW' },
+  { path: '/staff/dashboard', allowedRoles: ['STAFF'], label: 'Staff Dashboard', category: 'OVERVIEW' },
+  { path: '/customer/dashboard', allowedRoles: ['CUSTOMER'], label: 'Customer Portal', category: 'OVERVIEW' },
   { path: '/ai-hub', allowedRoles: ['ADMIN', 'STAFF', 'CUSTOMER'], label: 'AI Intelligence Hub', category: 'INTELLIGENCE' },
   { path: '/customers', allowedRoles: ['ADMIN', 'STAFF'], label: 'Customers', category: 'BUSINESS' },
   { path: '/products', allowedRoles: ['ADMIN'], label: 'Products & Variants', category: 'BUSINESS' },

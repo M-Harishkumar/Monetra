@@ -120,7 +120,7 @@ export function App() {
               <Route
                 path="staff/dashboard"
                 element={
-                  <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <RoleGuard allowedRoles={['STAFF']}>
                     <StaffDashboard />
                   </RoleGuard>
                 }
@@ -128,7 +128,7 @@ export function App() {
               <Route
                 path="customer/dashboard"
                 element={
-                  <RoleGuard allowedRoles={['ADMIN', 'CUSTOMER']}>
+                  <RoleGuard allowedRoles={['CUSTOMER']}>
                     <CustomerPortal />
                   </RoleGuard>
                 }

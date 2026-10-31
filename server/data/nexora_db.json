@@ -242,6 +242,48 @@
   "passwordResetTokens": [],
   "auditLogs": [
     {
+      "id": "AUDIT-1793431805679-445",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-CUST-01",
+      "actorName": "Marcus Sterling",
+      "actorRole": "CUSTOMER",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-CUST-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User customer@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T07:30:05.679Z"
+    },
+    {
+      "id": "AUDIT-1793431805565-297",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-STAFF-01",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "STAFF",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-STAFF-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User staff.sarah@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T07:30:05.565Z"
+    },
+    {
+      "id": "AUDIT-1793431805434-968",
+      "eventType": "USER_LOGIN",
+      "actorId": "USR-ADMIN-01",
+      "actorName": "Elena Rostova",
+      "actorRole": "ADMIN",
+      "action": "login",
+      "entityType": "user",
+      "entityId": "USR-ADMIN-01",
+      "previousValue": null,
+      "newValue": null,
+      "description": "User admin@nexora.io signed in successfully.",
+      "createdAt": "2026-10-31T07:30:05.434Z"
+    },
+    {
       "id": "AUDIT-1793424795234-95",
       "eventType": "USER_LOGIN",
       "actorId": "USR-ADMIN-01",
@@ -388,7 +430,7 @@
     {
       "id": "VAR-002",
       "productId": "PROD-001",
-      "name": "Professional Multi-Org",
+      "name": "Odoo Brand Edition",
       "additionalPrice": 560,
       "isDefault": false,
       "status": "ACTIVE",
@@ -509,7 +551,48 @@
     }
   ],
   "planProducts": [],
-  "quotationTemplates": [],
+  "quotationTemplates": [
+    {
+      "id": "QT-TMP-01",
+      "name": "Enterprise Full-Suite Template",
+      "code": "TMP-ENTERPRISE",
+      "planId": "PLAN-003",
+      "validityDays": 30,
+      "defaultQuantity": 5,
+      "paymentTerms": "Net 30",
+      "description": "Pre-configured enterprise proposal including flagship core, dedicated SLA, and ERP connector.",
+      "notes": "Standard 30-day quote window with volume pricing applied.",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-31T07:30:04.992Z"
+    },
+    {
+      "id": "QT-TMP-02",
+      "name": "Growth SaaS with Odoo Brand Variant",
+      "code": "TMP-ODOO-GROWTH",
+      "planId": "PLAN-002",
+      "validityDays": 14,
+      "defaultQuantity": 2,
+      "variantId": "VAR-002",
+      "paymentTerms": "Net 15",
+      "description": "Mid-market growth package tailored with Odoo brand customization (+₹560/mo).",
+      "notes": "Ideal for Odoo ERP clients transitioning to recurring billing.",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-31T07:30:04.992Z"
+    },
+    {
+      "id": "QT-TMP-03",
+      "name": "Starter Cloud Launch Pilot",
+      "code": "TMP-STARTER-PILOT",
+      "planId": "PLAN-001",
+      "validityDays": 7,
+      "defaultQuantity": 1,
+      "paymentTerms": "Due Upon Receipt",
+      "description": "Turnkey pilot quotation valid for 7 calendar days for rapid onboarding.",
+      "notes": "Automated conversion to monthly billing upon confirmation.",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-31T07:30:04.992Z"
+    }
+  ],
   "quotationTemplateItems": [],
   "quotations": [
     {

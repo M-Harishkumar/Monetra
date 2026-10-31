@@ -2440,7 +2440,7 @@ router.post('/reconciliation/match', authMiddleware, requireRole('ADMIN', 'STAFF
 // 16. PORTFOLIO INTELLIGENCE & ANALYTICS
 // -------------------------------------------------------------
 
-router.get('/analytics/dashboard', authMiddleware, (req: Request, res: Response) => {
+router.get('/analytics/dashboard', authMiddleware, requireRole('ADMIN'), (req: Request, res: Response) => {
   const db = getDb();
   const authUser = (req as any).user as AuthUser;
 
@@ -2533,6 +2533,73 @@ router.get('/analytics/dashboard', authMiddleware, (req: Request, res: Response)
     atRiskSubsCount,
     planBreakdown,
     monthlyTrend,
+  });
+});
+
+// -------------------------------------------------------------
+// 16B. STRICT ROLE-BASED DASHBOARD VERIFICATION APIS
+// -------------------------------------------------------------
+
+router.get('/dashboard/admin', authMiddleware, requireRole('ADMIN'), (req: Request, res: Response) => {
+  const db = getDb();
+  const activeSubs = db.subscriptions.filter(s => s.status === 'ACTIVE');
+  const mrr = activeSubs.reduce((sum, s) => {
+    let monthlyAmount = s.totalRecurringAmount || 0;
+    if (s.billingFrequency === 'yearly') monthlyAmount = monthlyAmount / 12;
+    if (s.billingFrequency === 'weekly') monthlyAmount = monthlyAmount * 4.33;
+    if (s.billingFrequency === 'daily') monthlyAmount = monthlyAmount * 30;
+    return sum + monthlyAmount;
+  }, 0);
+  const activeAlerts = db.revenueGuardAlerts.filter(a => a.status === 'new' || a.status === 'investigating');
+  const totalLeakageExposure = activeAlerts.reduce((sum, a) => sum + (a.estimatedFinancialImpact || 0), 0);
+
+  return sendSuccess(res, {
+    role: 'ADMIN',
+    dashboard: 'Admin Executive Dashboard',
+    mrr: Number(mrr.toFixed(2)),
+    arr: Number((mrr * 12).toFixed(2)),
+    totalCustomers: db.customers.length,
+    activeSubscriptions: activeSubs.length,
+    totalLeakageExposure: Number(totalLeakageExposure.toFixed(2)),
+    activeAlertsCount: activeAlerts.length,
+  });
+});
+
+router.get('/dashboard/staff', authMiddleware, requireRole('STAFF'), (req: Request, res: Response) => {
+  const db = getDb();
+  const pendingQuotations = db.quotations.filter(q => q.status === 'SENT' || q.status === 'DRAFT');
+  const overdueInvoices = db.invoices.filter(i => i.isOverdue && i.status !== 'PAID' && i.status !== 'CANCELLED');
+  const assignedAlerts = db.revenueGuardAlerts.filter(a => a.status === 'new' || a.status === 'investigating');
+
+  return sendSuccess(res, {
+    role: 'STAFF',
+    dashboard: 'Staff Operations Dashboard',
+    totalCustomers: db.customers.length,
+    pendingQuotationsCount: pendingQuotations.length,
+    overdueInvoicesCount: overdueInvoices.length,
+    assignedAlertsCount: assignedAlerts.length,
+  });
+});
+
+router.get('/dashboard/customer', authMiddleware, requireRole('CUSTOMER'), (req: Request, res: Response) => {
+  const authUser = (req as any).user as AuthUser;
+  const db = getDb();
+  const customerId = authUser.customerId;
+  const mySubscriptions = db.subscriptions.filter(s => s.customerId === customerId);
+  const myInvoices = db.invoices.filter(i => i.customerId === customerId);
+  const myPayments = db.payments.filter(p => p.customerId === customerId);
+  const totalOutstanding = myInvoices
+    .filter(i => i.status !== 'PAID' && i.status !== 'CANCELLED')
+    .reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
+
+  return sendSuccess(res, {
+    role: 'CUSTOMER',
+    dashboard: 'Customer Account & Subscription Portal',
+    customerId,
+    subscriptionsCount: mySubscriptions.length,
+    invoicesCount: myInvoices.length,
+    paymentsCount: myPayments.length,
+    totalOutstanding: Number(totalOutstanding.toFixed(2)),
   });
 });
 

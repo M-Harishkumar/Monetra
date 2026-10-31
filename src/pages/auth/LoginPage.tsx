@@ -37,7 +37,12 @@ export const LoginPage: React.FC = () => {
 
   const routeUserByRole = (userRole: string) => {
     const fromPath = (location.state as any)?.from?.pathname;
-    if (fromPath && fromPath !== '/login' && fromPath !== '/signin' && fromPath !== '/') {
+    const isDashboardRoute =
+      fromPath === '/admin/dashboard' ||
+      fromPath === '/staff/dashboard' ||
+      fromPath === '/customer/dashboard';
+
+    if (fromPath && fromPath !== '/login' && fromPath !== '/signin' && fromPath !== '/' && !isDashboardRoute) {
       navigate(fromPath, { replace: true });
       return;
     }

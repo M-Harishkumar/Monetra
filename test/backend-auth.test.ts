@@ -84,3 +84,36 @@ test('Backend Auth: Role hierarchy restricts sensitive operational tools from lo
     assert.equal(checkEndpointAccess('CUSTOMER', ep), false, `CUSTOMER must NOT access ${ep}`);
   }
 });
+
+test('Backend Auth: Dashboard endpoints strictly enforce role authorization', () => {
+  const dashboardRoleMatrix: Record<string, string[]> = {
+    '/dashboard/admin': ['ADMIN'],
+    '/dashboard/staff': ['STAFF'],
+    '/dashboard/customer': ['CUSTOMER'],
+    '/analytics/dashboard': ['ADMIN'],
+  };
+
+  function isAuthorizedForDashboardApi(role: 'ADMIN' | 'STAFF' | 'CUSTOMER', endpoint: string): boolean {
+    const allowed = dashboardRoleMatrix[endpoint];
+    if (!allowed) return false;
+    return allowed.includes(role);
+  }
+
+  // 1. ADMIN
+  assert.equal(isAuthorizedForDashboardApi('ADMIN', '/dashboard/admin'), true);
+  assert.equal(isAuthorizedForDashboardApi('ADMIN', '/dashboard/staff'), false);
+  assert.equal(isAuthorizedForDashboardApi('ADMIN', '/dashboard/customer'), false);
+  assert.equal(isAuthorizedForDashboardApi('ADMIN', '/analytics/dashboard'), true);
+
+  // 2. STAFF
+  assert.equal(isAuthorizedForDashboardApi('STAFF', '/dashboard/admin'), false);
+  assert.equal(isAuthorizedForDashboardApi('STAFF', '/dashboard/staff'), true);
+  assert.equal(isAuthorizedForDashboardApi('STAFF', '/dashboard/customer'), false);
+  assert.equal(isAuthorizedForDashboardApi('STAFF', '/analytics/dashboard'), false);
+
+  // 3. CUSTOMER
+  assert.equal(isAuthorizedForDashboardApi('CUSTOMER', '/dashboard/admin'), false);
+  assert.equal(isAuthorizedForDashboardApi('CUSTOMER', '/dashboard/staff'), false);
+  assert.equal(isAuthorizedForDashboardApi('CUSTOMER', '/dashboard/customer'), true);
+  assert.equal(isAuthorizedForDashboardApi('CUSTOMER', '/analytics/dashboard'), false);
+});

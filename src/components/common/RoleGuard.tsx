@@ -15,7 +15,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   allowedRoles,
   fallback,
 }) => {
-  const { isAuthenticated, isLoading, role } = useAuth();
+  const { isAuthenticated, isLoading, user, role } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -29,11 +29,12 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
-  const hasAccess = allowedRoles.includes(role);
+  const effectiveRole = user.role || role;
+  const hasAccess = allowedRoles.includes(effectiveRole);
 
   if (!hasAccess) {
     if (fallback) {
@@ -42,7 +43,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
     return (
       <AccessDenied
         requiredRoles={allowedRoles}
-        currentRole={role}
+        currentRole={effectiveRole}
         attemptedPath={location.pathname}
       />
     );

@@ -2,14 +2,34 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isRouteAllowedForRole, getAccessibleRoutesForRole, ROUTE_PERMISSIONS } from '../src/utils/rbac.ts';
 
-test('RBAC matrix grants ADMIN full access across all routes', () => {
-  for (const route of ROUTE_PERMISSIONS) {
-    assert.equal(
-      isRouteAllowedForRole(route.path, 'ADMIN'),
-      true,
-      `ADMIN must have access to ${route.path}`
-    );
-  }
+test('RBAC matrix enforces strict ADMIN dashboard access and denies staff/customer dashboards', () => {
+  // Admin dashboard allowed
+  assert.equal(isRouteAllowedForRole('/admin/dashboard', 'ADMIN'), true);
+  // Staff and customer dashboards strictly forbidden for Admin
+  assert.equal(isRouteAllowedForRole('/staff/dashboard', 'ADMIN'), false);
+  assert.equal(isRouteAllowedForRole('/customer/dashboard', 'ADMIN'), false);
+
+  // Administrative modules allowed
+  assert.equal(isRouteAllowedForRole('/', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/ai-hub', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/customers', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/products', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/plans', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/quotations', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/subscriptions', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/invoices', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/payments', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/reconciliation', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/billing-engine', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/revenue-guard', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/health-monitor', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/renewals', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/simulator', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/reports', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/staff', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/audit-logs', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/email-logs', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/settings', 'ADMIN'), true);
 });
 
 test('RBAC matrix enforces strict STAFF boundaries', () => {
@@ -75,9 +95,27 @@ test('getAccessibleRoutesForRole returns filtered routes matching role permissio
   const staffRoutes = getAccessibleRoutesForRole('STAFF');
   const customerRoutes = getAccessibleRoutesForRole('CUSTOMER');
 
-  assert.equal(adminRoutes.length, ROUTE_PERMISSIONS.length);
+  assert.equal(adminRoutes.length, ROUTE_PERMISSIONS.length - 2);
+  assert.equal(adminRoutes.length, 21);
   assert.ok(staffRoutes.length < adminRoutes.length);
   assert.ok(customerRoutes.length < staffRoutes.length);
   assert.equal(customerRoutes.length, 7);
   assert.equal(staffRoutes.length, 12);
+});
+
+test('Strict Role-Based Dashboard Routing: Mutual Exclusivity', () => {
+  // 1. ADMIN only accesses /admin/dashboard
+  assert.equal(isRouteAllowedForRole('/admin/dashboard', 'ADMIN'), true);
+  assert.equal(isRouteAllowedForRole('/staff/dashboard', 'ADMIN'), false);
+  assert.equal(isRouteAllowedForRole('/customer/dashboard', 'ADMIN'), false);
+
+  // 2. STAFF only accesses /staff/dashboard
+  assert.equal(isRouteAllowedForRole('/admin/dashboard', 'STAFF'), false);
+  assert.equal(isRouteAllowedForRole('/staff/dashboard', 'STAFF'), true);
+  assert.equal(isRouteAllowedForRole('/customer/dashboard', 'STAFF'), false);
+
+  // 3. CUSTOMER only accesses /customer/dashboard
+  assert.equal(isRouteAllowedForRole('/admin/dashboard', 'CUSTOMER'), false);
+  assert.equal(isRouteAllowedForRole('/staff/dashboard', 'CUSTOMER'), false);
+  assert.equal(isRouteAllowedForRole('/customer/dashboard', 'CUSTOMER'), true);
 });
