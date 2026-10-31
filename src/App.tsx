@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import { AppLayout } from './components/layout/AppLayout.tsx';
+import { RoleGuard } from './components/common/RoleGuard.tsx';
 import { DashboardRouter } from './pages/dashboard/DashboardRouter.tsx';
 import { CustomersPage } from './pages/customers/CustomersPage.tsx';
 import { ProductsPage } from './pages/products/ProductsPage.tsx';
@@ -80,7 +81,7 @@ export function App() {
             }
           />
 
-          {/* Main App Layout guarded by ProtectedRoute */}
+          {/* Main App Layout guarded by ProtectedRoute and RoleGuard */}
           <Route
             path="/"
             element={
@@ -89,25 +90,160 @@ export function App() {
               </ProtectedRoute>
             }
           >
+            {/* Universal Root: smart router switches between Admin, Staff, and Customer dashboards */}
             <Route index element={<DashboardRouter />} />
-            <Route path="customers" element={<CustomersPage />} />
-            <Route path="products" element={<ProductsPage />} />
-            <Route path="plans" element={<PlansPage />} />
-            <Route path="quotations" element={<QuotationsPage />} />
-            <Route path="subscriptions" element={<SubscriptionsPage />} />
-            <Route path="invoices" element={<InvoicesPage />} />
-            <Route path="payments" element={<PaymentsPage />} />
-            <Route path="billing-engine" element={<BillingEnginePage />} />
-            <Route path="revenue-guard" element={<RevenueGuardPage />} />
-            <Route path="health-monitor" element={<HealthMonitorPage />} />
-            <Route path="renewals" element={<RenewalCenterPage />} />
-            <Route path="simulator" element={<SimulatorPage />} />
-            <Route path="reconciliation" element={<ReconciliationPage />} />
-            <Route path="reports" element={<PortfolioIntelligencePage />} />
-            <Route path="staff" element={<StaffPage />} />
-            <Route path="audit-logs" element={<AuditLogsPage />} />
-            <Route path="email-logs" element={<EmailLogsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
+
+            {/* Business Management Routes */}
+            <Route
+              path="customers"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <CustomersPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="products"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <ProductsPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="plans"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <PlansPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="quotations"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
+                  <QuotationsPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="subscriptions"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <SubscriptionsPage />
+                </RoleGuard>
+              }
+            />
+
+            {/* Financial Operations Routes */}
+            <Route
+              path="invoices"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
+                  <InvoicesPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="payments"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
+                  <PaymentsPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="billing-engine"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <BillingEnginePage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="reconciliation"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <ReconciliationPage />
+                </RoleGuard>
+              }
+            />
+
+            {/* Revenue Intelligence Routes */}
+            <Route
+              path="revenue-guard"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <RevenueGuardPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="health-monitor"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <HealthMonitorPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="renewals"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF']}>
+                  <RenewalCenterPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="simulator"
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'STAFF', 'CUSTOMER']}>
+                  <SimulatorPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="reports"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <PortfolioIntelligencePage />
+                </RoleGuard>
+              }
+            />
+
+            {/* System Administration Routes */}
+            <Route
+              path="staff"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <StaffPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="audit-logs"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <AuditLogsPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="email-logs"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <EmailLogsPage />
+                </RoleGuard>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <SettingsPage />
+                </RoleGuard>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -118,4 +254,3 @@ export function App() {
 }
 
 export default App;
-
